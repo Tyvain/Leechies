@@ -1,0 +1,88 @@
+- !ComeToLeech.model.Source
+  rootUrl: https://annonces.nc/
+  rubriques:    
+    - !ComeToLeech.model.Rubrique    
+      category: INFORMATIQUE
+      subUrls:
+        - rubrique_technologie
+        - rubrique_informatique
+        - rubrique_tablettes_tactiles
+    - !ComeToLeech.model.Rubrique    
+      category: CONSOLE_JEUX
+      subUrls:
+        - rubrique_jeux_consoles_et_pc
+    - !ComeToLeech.model.Rubrique    
+      category: INFORMATIQUE
+      subUrls:
+        - rubrique_technologie
+        - rubrique_informatique
+        - rubrique_tablettes_tactiles
+    - !ComeToLeech.model.Rubrique    
+      category: IMAGE_SON
+      subUrls:
+        - rubrique_tv_video
+        - rubrique_appareils_photos
+        - rubrique_appareils_audio
+    - !ComeToLeech.model.Rubrique    
+      category: MUSIQUE
+      subUrls:
+        - rubrique_musique
+    - !ComeToLeech.model.Rubrique    
+      category: DVD_LIVRES
+      subUrls:
+        - rubrique_cd_dvd_b_ray_vinyls
+        - rubrique_livres_revues_bd
+    - !ComeToLeech.model.Rubrique    
+      category: TELEPHONIE
+      subUrls:
+        - rubrique_telephonie
+    - !ComeToLeech.model.Rubrique    
+      category: SPORT_HOBBIES
+      subUrls:
+        - rubrique_sports_loisirs
+        - rubrique_velo
+    - !ComeToLeech.model.Rubrique    
+      category: COLLECTION
+      subUrls:
+        - rubrique_collections
+    - !ComeToLeech.model.Rubrique    
+      category: JEUX_JOUETS
+      subUrls:
+        - rubrique_jouets_jeux_de_societe
+        - rubrique_modelisme
+        - rubrique_armes_airsoft
+    - !ComeToLeech.model.Rubrique    
+      category: VIN_GASTRONOMIE
+      subUrls:
+        - rubrique_fruits_et_legumes_du_jardin
+    - !ComeToLeech.model.Rubrique    
+      category: ELECTROMENAGER
+      subUrls:
+        - rubrique_electromenager
+    - !ComeToLeech.model.Rubrique    
+      category: BRICOLAGE
+      subUrls:
+        - rubrique_bricolage
+    - !ComeToLeech.model.Rubrique    
+      category: JARDINAGE
+      subUrls:
+        - rubrique_jardinage
+    - !ComeToLeech.model.Rubrique    
+      category: ANIMAUX
+      subUrls:
+        - rubrique_animaux
+    - !ComeToLeech.model.Rubrique    
+      category: MAISON_DIVERS
+      subUrls:
+        - rubrique_art_deco
+        - rubrique_bijoux
+        - rubrique_puericulture
+        - rubrique_vide_grenier
+    - !ComeToLeech.model.Rubrique    
+      category: TROC
+      subUrls:
+        - rubrique_echange_troc
+    - !ComeToLeech.model.Rubrique    
+      category: PERDU_TROUVE
+      subUrls:
+        - rubrique_perdus_trouves
