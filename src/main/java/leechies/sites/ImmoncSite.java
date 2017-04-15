@@ -1,4 +1,4 @@
-package ComeToLeech.sites;
+package leechies.sites;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

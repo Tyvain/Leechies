@@ -3,8 +3,9 @@ package ComeToLeech;
 import java.io.FileNotFoundException;
 
 import junit.framework.TestCase;
-import ComeToLeech.model.Rubrique;
-import ComeToLeech.model.Source;
+import leechies.App;
+import leechies.model.Rubrique;
+import leechies.model.Source;
 
 import com.esotericsoftware.yamlbeans.YamlException;
 

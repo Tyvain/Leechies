@@ -1,6 +1,8 @@
-package ComeToLeech;
+package leechies;
 
-import ComeToLeech.model.Annonce;
+import org.apache.commons.lang3.StringUtils;
+
+import leechies.model.Annonce;
 
 public class AnnonceCleaner {
     
@@ -15,7 +17,9 @@ public class AnnonceCleaner {
 		// 11 900 000 F
     	 s = s.replaceAll(" ","");
          s = s.replace("F","");
-        return s;
+         s = s.replaceAll("cfp.*", "");
+         
+        return StringUtils.isNumeric(s)?s:"";
 	}
 
 	private String cleanAll (String s) {
@@ -25,6 +29,7 @@ public class AnnonceCleaner {
         s = s.replaceAll("<br> <br>", "<br>");
         s = s.replaceAll("<i>\\w\\w-.* </i>","");
         s = s.replace(",","");
+        s = s.replace("\"","");
        return s;
      }  
 }

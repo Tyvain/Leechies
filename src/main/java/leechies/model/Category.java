@@ -1,4 +1,4 @@
-package ComeToLeech.model;
+package leechies.model;
 
 public enum Category {
     // VEHICULE
@@ -50,7 +50,7 @@ public enum Category {
     HOMMES("Hommes"),
     BEBES("Bébés"),
     ACCESSOIRES_BIJOUX("Accessoires & bijoux"),
-    MODE_DIVERS("Divers (VETEMENTS)"),
+    MODE_DIVERS("Divers (MODE)"),
     
     // EMPLOI
     OFFRES("Offres"),

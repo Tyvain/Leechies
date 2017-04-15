@@ -1,7 +1,8 @@
-- !ComeToLeech.model.Source
+- !leechies.model.Source
   rootUrl: https://mode.nc/
+  className: leechies.sites.ModencSite
   rubriques:    
-    - !ComeToLeech.model.Rubrique    
+    - !leechies.model.Rubrique    
       category: FEMMES
       subUrls:
         - rubrique_femme  
@@ -10,18 +11,18 @@
         - rubrique_jupes
         - rubrique_robes  
         - rubrique_ados_filles
-    - !ComeToLeech.model.Rubrique    
+    - !leechies.model.Rubrique    
       category: HOMMES
       subUrls:   
         - rubrique_homme
         - rubrique_costumes
         - rubrique_ados_garcons
-    - !ComeToLeech.model.Rubrique    
+    - !leechies.model.Rubrique    
       category: BEBES
       subUrls:
         - rubrique_bebes
         - rubrique_maternite
-    - !ComeToLeech.model.Rubrique    
+    - !leechies.model.Rubrique    
       category: ACCESSOIRES_BIJOUX
       subUrls:   
         - rubrique_bijoux
@@ -29,7 +30,7 @@
         - rubrique_beaute
         - rubrique_accessoires
         - rubrique_bijoux_montres 
-    - !ComeToLeech.model.Rubrique    
+    - !leechies.model.Rubrique    
       category: MODE_DIVERS
       subUrls:
         - rubrique_ensembles

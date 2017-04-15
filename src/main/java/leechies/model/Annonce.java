@@ -1,4 +1,4 @@
-package ComeToLeech.model;
+package leechies.model;
 
 import java.util.Objects;
 

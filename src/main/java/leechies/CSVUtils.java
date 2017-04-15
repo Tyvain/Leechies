@@ -1,4 +1,4 @@
-package ComeToLeech;
+package leechies;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -9,7 +9,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import ComeToLeech.model.Annonce;
+import leechies.model.Annonce;
 
 public class CSVUtils {
 
@@ -23,6 +23,11 @@ public class CSVUtils {
         return annonce.imgs.length > index ? annonce.imgs[index].replaceAll(" ", "%20") : "";
     }
 
+    public static void writeFirstLine (Writer w) throws IOException{
+    	 CSVUtils.writeLine(w, Arrays.asList("user_name", "user_email", "title", "description", "date", "category", "location",
+                 "price", "address", "phone", "website", "image_1", "image_2", "image_3", "image_4"));
+    }
+    
     public static void closeFile(Writer w){
         try {
             w.flush();

@@ -1,25 +1,26 @@
-- !ComeToLeech.model.Source
+- !leechies.model.Source
   rootUrl: https://nautisme.nc/
+  className: leechies.sites.GenericSite
   rubriques:
-    - !ComeToLeech.model.Rubrique
+    - !leechies.model.Rubrique
       category: VOILIERS
       subUrls:
         - rubrique_voiliers
         - rubrique_catamarans  
-    - !ComeToLeech.model.Rubrique
+    - !leechies.model.Rubrique
       category: BATEAUX_MOTEUR
       subUrls:
         - rubrique_bateaux_a_moteur
         - rubrique_motos_marines  
-    - !ComeToLeech.model.Rubrique
+    - !leechies.model.Rubrique
       category: NAUTISME_SPORT_LOISIRS
       subUrls:
         - rubrique_sports_loisirs
-    - !ComeToLeech.model.Rubrique
+    - !leechies.model.Rubrique
       category: PECHE
       subUrls:
         - rubrique_accessoires_de_peche
-    - !ComeToLeech.model.Rubrique
+    - !leechies.model.Rubrique
       category: NAUTISME_DIVERS
       subUrls:
         - rubrique_propulseurs
