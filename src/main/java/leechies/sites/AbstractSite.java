@@ -7,6 +7,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
+import leechies.DBManager;
 import leechies.model.Annonce;
 
 public abstract class AbstractSite {
@@ -35,8 +36,11 @@ public abstract class AbstractSite {
         // liste des urls
         Stream<String> urlz = idz.map(s -> buildUrl(rootUrl, s));
 
+        // on eleve les urls qui existent deja
+        Stream<String> newUrlz = urlz.filter(u -> !DBManager.annonceExists(u));
+        
         // liste des annonces        
-        Stream<Annonce> ret = urlz.map(u -> getAnnonceFromUrl(u, rootUrl, rub));
+        Stream<Annonce> ret = newUrlz.map(u -> getAnnonceFromUrl(u, rootUrl, rub));
         return ret;
     }
     
@@ -83,24 +87,10 @@ public abstract class AbstractSite {
 	        Stream<String> imgz = els.stream().map(e -> {            
 	            String href = e.attr("href");            
 	            String img = StringUtils.substringBetween(href, "big&src=", "&title");
-	            System.out.println("img: " + img);
+	           // System.out.println("img: " + img);
 	            return img!=null?img:"";
 	            });        
 	        String[] stringArray = imgz.toArray(size -> new String[size]);
 	        return stringArray;
-    	
-    	
-//        Elements els = doc.select(getImageSelector());
-//        Stream<String> imgz = els.stream().map(e -> {            
-//            String href = e.attr("href");            
-//            String img = StringUtils.substringBetween(href, "big&src=", "&title");
-//            String rez = buildUrl(rootUrl, img);
-//           /* System.out.println("rootUrl: " + rootUrl);
-//            System.out.println("img: " + img);
-//            System.out.println("rez: " + rez);*/
-//            return rez;
-//            });        
-//        String[] stringArray = imgz.toArray(size -> new String[size]);
-//        return stringArray;
     }
 }

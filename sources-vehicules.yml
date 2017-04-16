@@ -1,6 +1,6 @@
 - !leechies.model.Source
   rootUrl: https://automobiles.nc/
-  className: leechies.sites.GenericSite
+  className: leechies.sites.GenericWamSite
   rubriques:    
     - !leechies.model.Rubrique    
       category: VEHICULE_4x4

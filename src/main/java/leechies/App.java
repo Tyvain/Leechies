@@ -1,7 +1,6 @@
 package leechies;
 
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,36 +15,30 @@ import leechies.sites.AbstractSite;
 
 public class App {
 	// public static String SOURCE = "sources-nautisme.yml";
-	 //public static String SOURCE = "sources-vehicules.yml";
+	// public static String SOURCE = "sources-vehicules.yml";
 	// public static String SOURCE = "sources-all.yml";
 	// public static String SOURCE = "sources-mode.yml";
-	public static String SOURCES[] = {"sources-immonc.yml", "sources-mode.yml", "sources-vehicules.yml", "sources-vehicules.yml"};
-	//public static String SOURCES[] = {"sources-vehicules.yml"};
+	// public static String SOURCES[] = {"sources-immonc.yml",
+	// "sources-mode.yml", "sources-vehicules.yml", "sources-vehicules.yml"};
+	public static String SOURCES[] = { "sources-mode.yml" };
 
 	public static boolean MODE_HORS_LIGNE = false;
-	public static int NB_LIMITE_ANNONCE = 10000;
+	public static int NB_LIMITE_ANNONCE = 5;
 
 	public static void main(String[] args) throws IOException {
 		System.out.println("Start...");
-
-		System.out.println("- create file");
-		String csvFile = "importAds.csv";
-		FileWriter writer = new FileWriter(csvFile);
-		CSVUtils.writeFirstLine(writer);
-
-		System.out.println("- get ads");
 		App.getSourceStream().flatMap(s -> {
-			System.out.println("s: " + s); 
-		return MODE_HORS_LIGNE ? getAnnonceFromSourceStub(s) : getAnnonceFromSource(s);
+			System.out.println("s: " + s);
+			return MODE_HORS_LIGNE ? getAnnonceFromSourceStub(s) : getAnnonceFromSource(s);
 		}) // récupération des annonces
-				.filter(f -> !f.isCommerciale) // anonces non commerciales
-				.filter(f -> f.imgs != null && f.imgs.length > 0) // annonces avec images				
+				//.filter(f -> !f.isCommerciale) // anonces non commerciales
+				//.filter(f -> f.imgs != null && f.imgs.length > 0) // annonces avec images
 				.distinct() // suppression des doublons
 				.map(a -> new AnnonceCleaner().cleanAnnonce(a)) // nettoyage
-				.forEach(a -> CSVUtils.writeAnnonce(writer, a)); // ecriture dans le fichier
+				// .forEach(a -> CSVUtils.writeAnnonce(writer, a)); // ecriture
+				// dans le fichier
+				.forEach(a -> DBManager.saveAnnonce(a));
 
-		System.out.println("close file");
-		CSVUtils.closeFile(writer);
 		System.out.println("...finished!");
 
 	}
@@ -83,7 +76,7 @@ public class App {
 			clazz = Class.forName(source.className);
 			AbstractSite site = (AbstractSite) clazz.newInstance();
 			return site.getAnnonces(source.rootUrl, url, rub);
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {		
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			System.err.println("Zuuut !! " + e);
 		}
 		return null;

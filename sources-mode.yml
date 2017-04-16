@@ -1,6 +1,6 @@
 - !leechies.model.Source
   rootUrl: https://mode.nc/
-  className: leechies.sites.ModencSite
+  className: leechies.sites.GenericWamSite
   rubriques:    
     - !leechies.model.Rubrique    
       category: FEMMES

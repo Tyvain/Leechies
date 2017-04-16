@@ -41,9 +41,6 @@ public class ImmoncSite extends AbstractSite {
         Stream<String> imgz = els.stream().map(e -> {            
             String img = e.attr("href");            
             String rez = rootUrl + img;
-         /*   System.out.println("rootUrl: " + rootUrl);
-            System.out.println("img: " + img);
-            System.out.println("rez: " + rez);*/
             return rez;
             });        
         String[] stringArray = imgz.toArray(size -> new String[size]);

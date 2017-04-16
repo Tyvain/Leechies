@@ -2,10 +2,13 @@ package leechies.sites;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
-public class GenericSite extends AbstractSite {
+public class GenericWamSite extends AbstractSite {
 
 	@Override
 	protected String getImageSelector() {
@@ -38,4 +41,17 @@ public class GenericSite extends AbstractSite {
 		return "";
 	}
 
+	@Override
+    protected String[] getImagesFromDoc(Document doc, String rootUrl) {
+        Elements els = doc.select(getImageSelector());
+        Stream<String> imgz = els.stream().map(e -> {            
+            String href = e.attr("href");            
+            String img = StringUtils.substringBetween(href, "big&src=", "&title");
+            //System.out.println("img: " + rootUrl+img);
+            return img!=null?rootUrl+img:"";
+            });        
+        String[] stringArray = imgz.toArray(size -> new String[size]);
+        return stringArray;
+}
+	
 }
