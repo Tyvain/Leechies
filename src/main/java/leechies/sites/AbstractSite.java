@@ -26,7 +26,7 @@ public abstract class AbstractSite {
         // liste des docs (cas des pages contenant les liens)  
         System.out.println("       from " + rootUrl + rubUrl + " into " + rub + "...");
         Document doc = getDocumentFromUrl(rootUrl + rubUrl);
-
+        System.out.println(doc);
         // liste des elements (cad liens des annonces)
         Elements elemz = doc.select(getLinkSelector());
 
@@ -73,7 +73,10 @@ public abstract class AbstractSite {
             //System.out.print("       pausing " + pause / 1000 + " s...");
             Thread.sleep(pause);           
             
-           return Jsoup.connect(url).timeout(10000).validateTLSCertificates(false).get();
+           return Jsoup.connect(url)
+        		   .followRedirects(true)
+        		   .validateTLSCertificates(false)
+        		   .get();
             
            // return Jsoup.parse(new URL(url).openStream(), "UTF-8", url);
         } catch (Exception e) {
