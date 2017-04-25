@@ -24,9 +24,8 @@ public abstract class AbstractSite {
     
     public Stream<Annonce> getAnnonces(String rootUrl, String rubUrl, String rub) {
         // liste des docs (cas des pages contenant les liens)  
-        System.out.println("       from " + rootUrl + rubUrl + " into " + rub + "...");
         Document doc = getDocumentFromUrl(rootUrl + rubUrl);
-        System.out.println(doc);
+        
         // liste des elements (cad liens des annonces)
         Elements elemz = doc.select(getLinkSelector());
 

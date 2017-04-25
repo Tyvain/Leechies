@@ -13,7 +13,8 @@ import leechies.model.Annonce;
 
 @SuppressWarnings("unchecked")
 public class DBManager {
-	private static File fileDB = new File("AllAdsDB");
+    private static ClassLoader classLoader = DBManager.class.getClassLoader();
+	private static File fileDB = new File(classLoader.getResource("AllAdsDB").getFile());
 	private static FileInputStream fis;
 	private static ObjectInputStream ois;
 	private static FileOutputStream fos;

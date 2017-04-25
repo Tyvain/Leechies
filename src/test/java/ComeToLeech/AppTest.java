@@ -31,7 +31,7 @@ public class AppTest extends TestCase {
      */
     public void testApp() {
 
-     App.getSourceStream().forEach(s -> displaySource(s));
+     // TODO
 
     }
 

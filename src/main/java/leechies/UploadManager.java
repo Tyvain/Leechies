@@ -18,7 +18,7 @@ import org.jsoup.nodes.Document;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-public class Upload {
+public class UploadManager {
 
     private static String UT      = "39924a52f759ee5de2b10285f8daaadf12a59d4d";
     private static String IDU     = "1"; // id user
@@ -34,22 +34,42 @@ public class Upload {
     }
 
     public static void uploadAnnonceWithImage(Annonce annonce) {
-            String idAd;
-            try {
+            String idAd=null;
+            annonce.hasError = false;
+            annonce.error = "";
+            annonce.uploadedTime = null;
+             try {
                 idAd = uploadAnnonce(annonce); 
-                for (String img : annonce.imgs) {
-                    uploadImage(img, idAd);
-                    }
-            } catch (IOException | URISyntaxException e) {
+            } catch (IOException e) {
                 annonce.hasError = true;
-                annonce.error = e.getMessage();
+                annonce.error = "Err upload AD: " + e.getMessage();
                 DBManager.saveAnnonce(annonce);
                 return;
             }
-            annonce.uploadedTime = new Date();
-            annonce.error = "";
-            annonce.hasError = false;
-             DBManager.saveAnnonce(annonce);            
+      
+            int imageSucceedUpload=0;            
+                for (String img : annonce.imgs) {
+                   try {
+                    uploadImage(img, idAd);                   
+                      } catch (IOException | URISyntaxException e) {
+                        annonce.hasError = true;
+                        annonce.error += "Err image: " + img + " - ";
+                        }
+                   imageSucceedUpload++;
+                }
+      
+            
+            // on a réussit à uploader au moins une image
+            if (imageSucceedUpload > 0) {            
+                annonce.uploadedTime = new Date();                
+            } else { // aucune image -> on delete
+                try {                    
+                    deleteAnnonce(idAd);
+                } catch (IOException e) {
+                    System.out.println("Erreru deleting ad : " + e);
+                  }
+            }
+            DBManager.saveAnnonce(annonce);  
         }
 
     public static String uploadAnnonce(Annonce annonce) throws IOException {
@@ -71,7 +91,7 @@ public class Upload {
     
     public static void uploadImage(String u, String adId) throws IOException, URISyntaxException {
         // create file
-        URL url = new URL(u);
+        URL url = new URL(u.replaceAll(" ", "%20"));
         File file = new File("./temp.jpg");
         FileUtils.copyURLToFile(url, file);        
         
@@ -82,14 +102,26 @@ public class Upload {
         .post();       
         }
     
+    
+    public static void deleteAnnonce (String idAd) throws IOException {
+        getConnectionAdService(URL_ADS+"/delete/"+idAd) 
+        .data("user_token", UT)
+        .post();  
+        }
 
-    public static void main(String[] args) throws IOException, URISyntaxException {       
-     /*  URL url = new URL("http://thiswallpaper.com/cdn/hdwallpapers/747/cute%20pomeranian%20small%20dog%20high%20resolution%20wallpaper.jpg");
-        File file = new File("./temp.jpg");
+    public static void main(String[] args) throws IOException, URISyntaxException {
+        
+       // System.out.println("wtf");
+       // deleteAnnonce("6651"); 
+
+       /*URL url = new URL("http://immonc.com/photos/photos_big/5265305_1461800535_port du sud chaaf (6).JPG");
+        File file = new File("/projects/Leechies/temp2.jpg");
         
         System.out.println("Creating file...");    
         FileUtils.copyURLToFile(url, file);
         System.out.println("File created!");  */
+        
+        //
       
       
    /*   Annonce test = new Annonce();

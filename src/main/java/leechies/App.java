@@ -1,5 +1,6 @@
 package leechies;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -13,9 +14,9 @@ import leechies.sites.AbstractSite;
 import com.esotericsoftware.yamlbeans.YamlReader;
 
 public class App {
-	 public static String ALL_SOURCES[] =  { "sources-immonc.yml", "sources-mode.yml", "sources-vehicules.yml",	"sources-vehicules.yml" };
-	public static String SOURCES[] = ALL_SOURCES;
-//	public static String SOURCES[] = { "sources-immobiliernc.yml" };
+	 public static String ALL_SOURCES[] =  { "resources/sources-immonc.yml", "resources/sources-mode.yml", "resources/sources-vehicules.yml",	"resources/sources-vehicules.yml" };
+	//public static String SOURCES[] = ALL_SOURCES;
+	public static String SOURCES[] = { "sources-immobiliernc.yml" };
 
 	public static void main(String[] args) throws IOException, URISyntaxException {
         goLeech();
@@ -23,21 +24,20 @@ public class App {
 	}
 
     private static void goUpload () {
-            DBManager.getAnnoncesByCriteria(false, false, false, true).forEach(a -> Upload.uploadAnnonceWithImage(a));
+            System.out.println("Start goUpload...");
+            DBManager.getAnnoncesByCriteria(false, false, false, true).forEach(a -> UploadManager.uploadAnnonceWithImage(a));
+            System.out.println("... goUpload finished!");
    }
 
     private static void goLeech() {
-		System.out.println("Start Leeching...");
+		System.out.println("Start goLeech...");
 		App.getSourceStream().flatMap(s -> {
-			System.out.println("s: " + s);
 			return getAnnonceFromSource(s);
 		}) // récupération des annonces
-				//.filter(f -> !f.isCommerciale) // anonces non commerciales
-				//.filter(f -> f.imgs != null && f.imgs.length > 0) // annonces avec images
 				.distinct() // suppression des doublons
 				.map(a -> new AnnonceCleaner().cleanAnnonce(a)) // nettoyage
 				.forEach(a -> DBManager.saveAnnonce(a));
-		System.out.println("...finished!");
+		System.out.println("... goLeech finished!");
         }
 
 	private static Stream<Annonce> getAnnonceFromSource(Source source) {
@@ -61,7 +61,13 @@ public class App {
 		Stream<Source> ret = Stream.empty();
 		try {
 			for (String source : SOURCES) {
-				YamlReader reader = new YamlReader(new FileReader(source));
+			    
+			    ClassLoader classLoader = App.class.getClassLoader();
+			    File file = new File(classLoader.getResource(source).getFile());
+			    System.out.println("file : " + file);
+			    YamlReader reader = new YamlReader(new FileReader(file));
+			    
+				//YamlReader reader = new YamlReader(new FileReader(source));
 				@SuppressWarnings("unchecked")
 				ArrayList<Source> wtf = (ArrayList<Source>) reader.read();
 				ret = Stream.concat(ret, wtf.stream());
