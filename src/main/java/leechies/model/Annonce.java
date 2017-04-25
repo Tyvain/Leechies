@@ -14,8 +14,10 @@ public class Annonce implements Serializable {
 	public String texte;
 	public String prix;
 	public boolean isCommerciale;
-	public Date uploadedTime; // date d'envoi sur finvalab
-
+	public Date uploadedTime=null; // date d'envoi sur finvalab
+	public boolean hasError=false; // annonce en erreur
+	public String error="";
+	
 	@Override
 	public boolean equals(Object o) {
 		Annonce a = (Annonce) o;

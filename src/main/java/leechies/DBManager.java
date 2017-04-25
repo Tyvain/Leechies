@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import leechies.model.Annonce;
 
@@ -22,7 +23,7 @@ public class DBManager {
 	public static void saveAnnonce(Annonce annonce) {
 		// read from file
 		try {
-			Map<String, Annonce> allAds = getAllAnnonces();
+			Map<String, Annonce> allAds = getAllAnnoncesMap();
 			System.out.println("DB Size: " + allAds.size() + " saving " + annonce.url);
 			allAds.put(annonce.url, annonce);
 			fos = new FileOutputStream(fileDB);
@@ -36,7 +37,7 @@ public class DBManager {
 		}
 	}
 
-	public static Map<String, Annonce> getAllAnnonces() {
+	public static Map<String, Annonce> getAllAnnoncesMap() {
 		// read from file
 		try {
 			fis = new FileInputStream(fileDB);
@@ -54,23 +55,22 @@ public class DBManager {
 
 	}
 
+	public static Stream<Annonce> getAllAnnonces() {
+			return getAllAnnoncesMap().values().stream();		
+	}
+
+
+    public static Stream<Annonce> getAnnoncesByCriteria(Boolean hasError, Boolean isUploaded, Boolean isCommerciale, Boolean hasImages) {
+        return getAllAnnonces()
+        .filter(f -> isCommerciale !=null? f.isCommerciale == isCommerciale:true)
+        .filter(f -> hasImages!=null? (!hasImages && (f.imgs == null || f.imgs.length == 0)) || (hasImages && f.imgs != null && f.imgs.length > 0):true)
+        .filter(f -> hasError!=null?f.hasError == hasError:true)
+        .filter(f -> isUploaded!=null? (!isUploaded && f.uploadedTime == null) || (isUploaded && f.uploadedTime != null):true);
+    }
+
 	public static boolean annonceExists(String url) {
-		boolean rez = getAllAnnonces() != null ? getAllAnnonces().containsKey(url) : false;
-		System.out.println(url + " Exists? " + rez);
+		boolean rez = getAllAnnoncesMap() != null ? getAllAnnoncesMap().containsKey(url) : false;
 		return rez;
 	}
 
-	public static void uplodAd(Annonce annonce) {
-		// /api/v1/ads
-		// http://finvalab.com/oc-panel/settings/general
-		//
-		// Document doc = Jsoup.connect("https://finvalab.com/api/v1/ads")
-		// .data("email", "myemailid")
-		// .data("pass", "mypassword")
-		// // and other hidden fields which are being passed in post request.
-		// .userAgent("Mozilla")
-		// .post();
-		// System.out.println(doc);
-		// pgWnFgikcjLKUQxRUY16FNSxzSttVQjS
-	}
 }
