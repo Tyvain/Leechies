@@ -15,7 +15,7 @@ public class DisplayAnnonces {
 		System.out.println("  - sans erreurs: " + DBManager.getAnnoncesByCriteria(false, null, null, null).count());
 		System.out.println("     - (à uploaded) non commerciales avec images non uploaded sans erreur: " + DBManager.getAnnoncesByCriteria(false, false, false, true).count());
 		System.out.println(" ---------------- ANNONCES EN ERREUR ------------------ ");
-		DBManager.getAnnoncesByCriteria(true, null, null, null).forEach(s -> System.out.println(s.url + " - " + s.error));
+		DBManager.getAnnoncesByCriteria(true, null, null, null).forEach(s -> System.out.println(s.texte + " - " + s.error));
 	}
 
 }

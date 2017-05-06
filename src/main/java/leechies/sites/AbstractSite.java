@@ -23,6 +23,8 @@ public abstract class AbstractSite {
     protected abstract String getPrixFromDoc (Document doc);
     
     public Stream<Annonce> getAnnonces(String rootUrl, String rubUrl, String rub) {
+        System.out.println("url: " + rootUrl+rubUrl);
+        
         // liste des docs (cas des pages contenant les liens)  
         Document doc = getDocumentFromUrl(rootUrl + rubUrl);
         
@@ -55,6 +57,8 @@ public abstract class AbstractSite {
     protected Annonce getAnnonce(Document doc, String url, String rootUrl, String rub) {
         Annonce ret = new Annonce();
         System.out.println("url: " + url);
+       // System.out.println("getTitreSelector(): " + getTitreSelector());
+       // System.out.println("select titre: " + doc.select(getTitreSelector()).first());
         ret.titre = doc.select(getTitreSelector()).first().text();
         ret.texte = doc.select(getTexteSelector()).first().html();
         ret.category = rub;

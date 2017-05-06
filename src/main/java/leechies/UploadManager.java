@@ -34,6 +34,8 @@ public class UploadManager {
     }
 
     public static void uploadAnnonceWithImage(Annonce annonce) {
+            AnnonceCleaner.cleanAnnonce(annonce);
+        
             String idAd=null;
             annonce.hasError = false;
             annonce.error = "";
@@ -78,10 +80,10 @@ public class UploadManager {
                 .data("id_user", IDU)
                 .data("id_category", ""+cat)
                 .data("title", annonce.titre)
-                .data("description", annonce.texte + "<br><a href='"+annonce.url+"'>annonce d'origine</a>") 
+                .data("description", annonce.texte) 
                 .data("user_token", UT)
-                .data("website ", annonce.url)
-                .data("price  ", annonce.prix)
+                .data("website", annonce.url)
+                .data("price", annonce.prix)
                 .post();
 
         String myJSONString = doc.text();
@@ -124,14 +126,15 @@ public class UploadManager {
         //
       
       
-   /*   Annonce test = new Annonce();
-        test.titre="testTitle";
-        test.texte="testDescription: ";
+      Annonce test = new Annonce();
+        test.titre="testTitle 2";
+        test.texte="<a href='www.google.com'>annonce d'origine</a>";
         test.category = Category.ACCESSOIRES_BIJOUX.libelle;
-        test.url="www.google.com";
+        test.url="http://www.google.com";
+        test.prix="0";
         String newAdId = uploadAnnonce(test); 
         
-        System.out.println("Annonce créée : " + newAdId);*/         
+        System.out.println("Annonce créée : " + newAdId);      
         //uploadImage("http://thiswallpaper.com/cdn/hdwallpapers/747/cute%20pomeranian%20small%20dog%20high%20resolution%20wallpaper.jpg", "5545");
     }
 }

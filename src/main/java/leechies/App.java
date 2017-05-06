@@ -14,11 +14,13 @@ import leechies.sites.AbstractSite;
 import com.esotericsoftware.yamlbeans.YamlReader;
 
 public class App {
-	 public static String ALL_SOURCES[] =  { "resources/sources-immonc.yml", "resources/sources-mode.yml", "resources/sources-vehicules.yml",	"resources/sources-vehicules.yml" };
-	//public static String SOURCES[] = ALL_SOURCES;
-	public static String SOURCES[] = { "sources-immobiliernc.yml" };
+	public static String ALL_SOURCES[] =  { "sources-annonces.yml", "sources-nautisme.yml", "sources-immonc.yml", "sources-mode.yml", "sources-vehicules.yml"};
+	public static String SOURCES[] = ALL_SOURCES;
+	
+	//public static String SOURCES[] = { "sources-immobiliernc.yml" };
 
 	public static void main(String[] args) throws IOException, URISyntaxException {
+	    //DBManager.resetDB();
         goLeech();
         goUpload();        
 	}
@@ -33,10 +35,7 @@ public class App {
 		System.out.println("Start goLeech...");
 		App.getSourceStream().flatMap(s -> {
 			return getAnnonceFromSource(s);
-		}) // récupération des annonces
-				.distinct() // suppression des doublons
-				.map(a -> new AnnonceCleaner().cleanAnnonce(a)) // nettoyage
-				.forEach(a -> DBManager.saveAnnonce(a));
+		}).forEach(a -> DBManager.saveAnnonce(a));
 		System.out.println("... goLeech finished!");
         }
 

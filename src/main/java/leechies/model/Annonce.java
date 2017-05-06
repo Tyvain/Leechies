@@ -7,8 +7,9 @@ import java.util.Objects;
 public class Annonce implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	public Date created=new Date();// date de création (récupération de l'annonce)
+	public String url; // url de l'annonce (clef unique)
 	public String[] imgs;
-	public String url;
 	public String category;
 	public String titre;
 	public String texte;
@@ -17,6 +18,7 @@ public class Annonce implements Serializable {
 	public Date uploadedTime=null; // date d'envoi sur finvalab
 	public boolean hasError=false; // annonce en erreur
 	public String error="";
+
 	
 	@Override
 	public boolean equals(Object o) {
