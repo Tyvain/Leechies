@@ -14,7 +14,7 @@ import leechies.sites.AbstractSite;
 import com.esotericsoftware.yamlbeans.YamlReader;
 
 public class App {
-	public static String ALL_SOURCES[] =  { "sources-annonces.yml", "sources-nautisme.yml", "sources-immonc.yml", "sources-mode.yml", "sources-vehicules.yml"};
+	public static String ALL_SOURCES[] =  { "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml", "sources-immobiliernc.yml" };
 	public static String SOURCES[] = ALL_SOURCES;
 	
 	//public static String SOURCES[] = { "sources-immobiliernc.yml" };
