@@ -14,15 +14,20 @@ import leechies.sites.AbstractSite;
 import com.esotericsoftware.yamlbeans.YamlReader;
 
 public class App {
-	public static String ALL_SOURCES[] =  { "sources-annonces.yml", "sources-nautisme.yml", "sources-immonc.yml", "sources-mode.yml", "sources-vehicules.yml"};
-	public static String SOURCES[] = ALL_SOURCES;
+	//public static String ALL_SOURCES[] =  { "sources-annonces.yml", "sources-nautisme.yml", "sources-immonc.yml", "sources-mode.yml", "sources-vehicules.yml"};
+	//public static String SOURCES[] = ALL_SOURCES;
 	
-	//public static String SOURCES[] = { "sources-immobiliernc.yml" };
+	public static String SOURCES[] = { "sources-immonc.yml" };
+	private static int MAX_UPLOAD_ADS = 5000;
 
 	public static void main(String[] args) throws IOException, URISyntaxException {
-	    //DBManager.resetDB();
-        goLeech();
-        goUpload();        
+	   // DBManager.resetDB();
+	   int diff = UploadManager.countAnnonces() - MAX_UPLOAD_ADS;
+	   if (diff > 0) {
+	       UploadManager.getLastAnnonces(diff);
+	       }
+       // goLeech();
+       // goUpload();        
 	}
 
     private static void goUpload () {

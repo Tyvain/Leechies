@@ -1,20 +1,30 @@
 package leechies;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 
 import leechies.model.Annonce;
 import leechies.model.Category;
+import leechies.model.FinValavAnnonceList;
 
 import org.apache.commons.io.FileUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -31,6 +41,65 @@ public class UploadManager {
                     .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
                     .header("User-Agent", "Mozilla/5.0")
                     .ignoreContentType(true);
+    }
+
+    public static int countAnnonces () {
+           return getLastAnnonces(Integer.MAX_VALUE).length();
+    }
+
+    private static HttpURLConnection getFVConnection (int nbLastAnnonces) {
+            try {
+            URL myUrl = new URL(URL_ADS+"?user_token=39924a52f759ee5de2b10285f8daaadf12a59d4d&items_per_page="+nbLastAnnonces+"&sort=created&status!=50");
+            System.out.println("Calling : " + myUrl);
+            HttpURLConnection myURLConnection = (HttpURLConnection)myUrl.openConnection();      
+            myURLConnection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+            myURLConnection.setRequestProperty("User-Agent", "Mozilla/5.0");
+            myURLConnection.setRequestMethod("GET");
+            return myURLConnection;
+            } catch (IOException e) {
+                System.err.println("Erreur getFVConnection : " + e);
+            }
+            return null;
+         }
+
+        public static void removeLastAnnonces (int nbLastAnnonces) {
+            System.out.println("Removing the last " + nbLastAnnonces + " ads.");
+             
+           try {
+            getLastAnnonces (nbLastAnnonces).forEach(item -> {
+                JSONObject obj = (JSONObject) item;
+                deleteAnnonce(""+obj.get("id_ad"));
+            });
+            }
+            catch (JSONException e) {
+             System.err.println("Erreur removeLastAnnonces : " + e);
+            }
+        }
+
+      public static JSONArray getLastAnnonces(int nbLastAnnonces) {
+         try {           
+            HttpURLConnection myURLConnection = getFVConnection(nbLastAnnonces); 
+            myURLConnection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+            myURLConnection.setRequestProperty("User-Agent", "Mozilla/5.0");
+            myURLConnection.setRequestMethod("GET");           
+            BufferedReader rd = new BufferedReader(new InputStreamReader(myURLConnection.getInputStream()));
+            String jsonText = readAll(rd);
+            JSONObject json = new JSONObject(jsonText);
+           myURLConnection.getInputStream().close(); 
+           return json.getJSONArray("ads");
+        } catch (IOException | JSONException e) {
+           System.err.println("Erreur getLastAnnonces : " + e);
+          }
+          return null;
+      }
+			
+    private static String readAll(Reader rd) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        int cp;
+        while ((cp = rd.read()) != -1) {
+          sb.append((char) cp);
+        }
+        return sb.toString();
     }
 
     public static void uploadAnnonceWithImage(Annonce annonce) {
@@ -64,12 +133,8 @@ public class UploadManager {
             // on a réussit à uploader au moins une image
             if (imageSucceedUpload > 0) {            
                 annonce.uploadedTime = new Date();                
-            } else { // aucune image -> on delete
-                try {                    
+            } else { // aucune image -> on delete                 
                     deleteAnnonce(idAd);
-                } catch (IOException e) {
-                    System.out.println("Erreru deleting ad : " + e);
-                  }
             }
             DBManager.saveAnnonce(annonce);  
         }
@@ -105,10 +170,14 @@ public class UploadManager {
         }
     
     
-    public static void deleteAnnonce (String idAd) throws IOException {
-        getConnectionAdService(URL_ADS+"/delete/"+idAd) 
-        .data("user_token", UT)
-        .post();  
+    public static void deleteAnnonce (String idAd) {
+        try {
+            getConnectionAdService(URL_ADS+"/delete/"+idAd) 
+            .data("user_token", UT)
+            .post();
+        } catch (IOException e) {
+           System.err.println("Erreur deleteAnnonce : " + e);
+        }  
         }
 
     public static void main(String[] args) throws IOException, URISyntaxException {
