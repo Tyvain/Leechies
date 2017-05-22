@@ -29,7 +29,7 @@ public class App {
 	   System.out.println("diff: " + diff);
 	   
 	   if (diff > 0) {	       
-	       UploadManager.getLastAnnonces(diff);
+	       UploadManager.removeLastAnnonces(diff);
 	       }
        // goLeech();
        // goUpload();        
