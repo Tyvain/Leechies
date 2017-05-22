@@ -22,8 +22,13 @@ public class App {
 
 	public static void main(String[] args) throws IOException, URISyntaxException {
 	   // DBManager.resetDB();
-	   int diff = UploadManager.countAnnonces() - MAX_UPLOAD_ADS;
-	   if (diff > 0) {
+	   int totalUpAnnonces = UploadManager.countAnnonces();
+	   System.out.println("Total annonces: " + totalUpAnnonces);
+	   System.out.println("MAX_UPLOAD_ADS: " + MAX_UPLOAD_ADS);
+	   int diff = totalUpAnnonces - MAX_UPLOAD_ADS;
+	   System.out.println("diff: " + diff);
+	   
+	   if (diff > 0) {	       
 	       UploadManager.getLastAnnonces(diff);
 	       }
        // goLeech();
