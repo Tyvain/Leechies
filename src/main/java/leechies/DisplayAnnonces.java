@@ -24,6 +24,8 @@ public class DisplayAnnonces {
         System.out.println("Nb annonces : " + UploadManager.countAnnonces());
 		System.out.println(" ---------------- ANNONCES EN ERREUR ------------------ ");
 
+        UploadManager.removeDefinitlyAds("9211");
+
 	}
 }
 

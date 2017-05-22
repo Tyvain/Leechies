@@ -15,10 +15,10 @@ import com.esotericsoftware.yamlbeans.YamlReader;
 
 public class App {
 
-	public static String ALL_SOURCES[] =  { "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml", "sources-immonc.yml" }; };
+	public static String ALL_SOURCES[] =  { "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml", "sources-immonc.yml" };
 	public static String SOURCES[] = ALL_SOURCES;
 
-	private static int MAX_UPLOAD_ADS = 5000;
+	private static int MAX_UPLOAD_ADS = 4000;
 
 	public static void main(String[] args) throws IOException, URISyntaxException {
 	   // DBManager.resetDB();
