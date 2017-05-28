@@ -33,7 +33,17 @@ public class Annonce implements Serializable {
 
 	@Override
 	public String toString() {
-		return url + " # " + displayImages ();
+		String ret = "\nurl : "+ url;
+		ret += "\ncategory : "+ category;
+		ret += "\ntitre : "+ titre;
+		ret += "\ntexte : "+ texte;
+		ret += "\nprix : "+ prix;
+		ret += "\nisCommerciale : "+ isCommerciale;
+		ret += "\nuploadedTime : "+ uploadedTime;
+		ret += "\nuhasError : "+ hasError;
+		ret += "\nerror : "+ error;
+		ret += "\ndisplayImages () : "+ displayImages ();
+		return ret;
 	}
 	
 	public String displayImages () {

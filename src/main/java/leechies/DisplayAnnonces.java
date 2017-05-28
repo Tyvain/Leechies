@@ -21,11 +21,9 @@ public class DisplayAnnonces {
 		System.out.println("     - (à uploaded) non commerciales avec images non uploaded sans erreur: " + DBManager.getAnnoncesByCriteria(false, false, false, true).count());
 
 		System.out.println("-- FINVALAB");
-        System.out.println("Nb annonces : " + UploadManager.countAnnonces());
-		System.out.println(" ---------------- ANNONCES EN ERREUR ------------------ ");
-
-        UploadManager.removeDefinitlyAds("9211");
-
+       // System.out.println("Nb annonces : " + UploadManager.countAnnonces());        
+       // System.out.println("-- Detail annonce : " + DBManager.getAnnoncesByUrl("https://automobiles.nc/a_an.php?g=detail_annonce&id=2437001").get());
+       // DBManager.getAnnoncesByCriteria(null, true, null, null).forEach(item -> System.out.println(""+item));
+        }
 	}
-}
 

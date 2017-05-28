@@ -12,6 +12,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import leechies.model.Annonce;
@@ -80,7 +81,11 @@ public class DBManager {
 			return getAllAnnoncesMap().values().stream();		
 	}
 
-
+    public static Optional<Annonce> getAnnoncesByUrl(String url) {
+        return getAllAnnonces()
+        .filter(f -> url.equalsIgnoreCase(f.url)).findFirst();
+    }
+	
     public static Stream<Annonce> getAnnoncesByCriteria(Boolean hasError, Boolean isUploaded, Boolean isCommerciale, Boolean hasImages) {
         return getAllAnnonces()
         .filter(f -> isCommerciale !=null? f.isCommerciale == isCommerciale:true)

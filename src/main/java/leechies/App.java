@@ -16,12 +16,23 @@ import com.esotericsoftware.yamlbeans.YamlReader;
 public class App {
 
 	public static String ALL_SOURCES[] =  { "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml", "sources-immonc.yml" };
+	//public static String ALL_SOURCES[] =  { "sources-vehicules.yml" };
 	public static String SOURCES[] = ALL_SOURCES;
 
-	private static int MAX_UPLOAD_ADS = 4000;
+	// # !!!
+	private static int FORCE_REMOVE_UPLOAD_ADS= 0; // remove the last x ads from website
+	private static boolean RESET_DB = false; // reset local DB (backup old one)
+	// # !!!
+	
+	private static int MAX_UPLOAD_ADS = 4000; // max ads on website	
+	private static boolean GO_LEECH = true; // leech + DB insert
+	private static boolean GO_UPLOAD = true; // upload ads
 
 	public static void main(String[] args) throws IOException, URISyntaxException {
-	   // DBManager.resetDB();
+		if (RESET_DB) {
+			System.out.println("Reseting DB");
+			DBManager.resetDB();
+		}
 	   int totalUpAnnonces = UploadManager.countAnnonces();
 	   System.out.println("Total annonces: " + totalUpAnnonces);
 	   System.out.println("MAX_UPLOAD_ADS: " + MAX_UPLOAD_ADS);
@@ -31,8 +42,20 @@ public class App {
 	   if (diff > 0) {	       
 	       UploadManager.removeLastAnnonces(diff);
 	       }
-       // goLeech();
-       // goUpload();        
+	   
+	   if (FORCE_REMOVE_UPLOAD_ADS > 0) {
+		   UploadManager.removeLastAnnonces(FORCE_REMOVE_UPLOAD_ADS);
+	   }
+	   
+	   if (GO_LEECH) {
+		   System.out.println("Go leech");
+		   goLeech();
+	   }
+	   
+	   if (GO_UPLOAD) {
+		System.out.println("Go upload");
+        goUpload();    
+	   }
 	}
 
     private static void goUpload () {

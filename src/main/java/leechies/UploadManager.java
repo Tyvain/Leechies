@@ -10,11 +10,6 @@ import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
-import java.util.List;
-
-import leechies.model.Annonce;
-import leechies.model.Category;
-import leechies.model.FinValavAnnonceList;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
@@ -24,9 +19,11 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+
+import leechies.model.Annonce;
+import leechies.model.Category;
 
 public class UploadManager {
 
@@ -150,6 +147,7 @@ public class UploadManager {
             } catch (IOException e) {
                 annonce.hasError = true;
                 annonce.error = "Err upload AD: " + e.getMessage();
+                deleteAnnonce(idAd);
                 DBManager.saveAnnonce(annonce);
                 return;
             }
@@ -157,12 +155,12 @@ public class UploadManager {
             int imageSucceedUpload=0;            
                 for (String img : annonce.imgs) {
                    try {
-                    uploadImage(img, idAd);                   
+                    uploadImage(img, idAd);
+                    imageSucceedUpload++;
                       } catch (IOException | URISyntaxException e) {
                         annonce.hasError = true;
-                        annonce.error += "Err image: " + img + " - ";
-                        }
-                   imageSucceedUpload++;
+                        annonce.error += "Err image: " + img + " - " + e;
+                        }                  
                 }
       
             

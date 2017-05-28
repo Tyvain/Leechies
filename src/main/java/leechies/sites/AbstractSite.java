@@ -1,7 +1,6 @@
 package leechies.sites;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
