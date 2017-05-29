@@ -3,15 +3,18 @@ package leechies.sites;
 import java.io.IOException;
 import java.util.stream.Stream;
 
+import leechies.DBManager;
+import leechies.model.Annonce;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-
-import leechies.DBManager;
-import leechies.model.Annonce;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractSite {
+    final static Logger logger = LoggerFactory.getLogger("AbstractSite");
 
 	protected abstract String getTitreSelector();
 
@@ -92,7 +95,7 @@ public abstract class AbstractSite {
 				success = true;
 				break;
 			} catch (IOException ex) {
-				System.err.println("getDocumentFromUrl err: " + ex + " -> retry " + i);
+				logger.error("GetDocumentFromUrl - " + ex + " -> retry " + i);
 			}
 
 			i++;
@@ -111,7 +114,6 @@ public abstract class AbstractSite {
 		Stream<String> imgz = els.stream().map(e -> {
 			String href = e.attr("href");
 			String img = StringUtils.substringBetween(href, "big&src=", "&title");
-			// System.out.println("img: " + img);
 			return img != null ? img : "";
 		});
 		String[] stringArray = imgz.toArray(size -> new String[size]);

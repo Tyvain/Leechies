@@ -11,9 +11,13 @@ import leechies.model.Annonce;
 import leechies.model.Source;
 import leechies.sites.AbstractSite;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.esotericsoftware.yamlbeans.YamlReader;
 
 public class App {
+    final static Logger logger = LoggerFactory.getLogger("App");
 
 	public static String ALL_SOURCES[] =  { "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml", "sources-immonc.yml" };
 	//public static String ALL_SOURCES[] =  { "sources-vehicules.yml" };
@@ -29,15 +33,41 @@ public class App {
 	private static boolean GO_UPLOAD = true; // upload ads
 
 	public static void main(String[] args) throws IOException, URISyntaxException {
+	    
+	    logger.info("### PARAMS ### " );
+	    logger.info("ALL_SOURCES: " + ALL_SOURCES);
+	    logger.info("SOURCES: " + SOURCES);
+	    logger.info("FORCE_REMOVE_UPLOAD_ADS: " + FORCE_REMOVE_UPLOAD_ADS);
+	    logger.info("RESET_DB: " + RESET_DB);
+	    logger.info("MAX_UPLOAD_ADS: " + MAX_UPLOAD_ADS);
+	    logger.info("GO_LEECH: " + GO_LEECH);
+	    logger.info("GO_UPLOAD: " + GO_UPLOAD);
+	    
+	    
+	    logger.info("### INFOS ### " );
+	    int totalUpAnnonces = UploadManager.countAnnonces();
+	    logger.info("-- Total Ads online: " + totalUpAnnonces);	   
+	    int diff = totalUpAnnonces - MAX_UPLOAD_ADS;
+	    
+	    logger.info("-- LOCAL DB");
+        logger.info("Nombre d'annonces: " + totalUpAnnonces);
+        logger.info("  - avec images: " + DBManager.getAnnoncesByCriteria(null, null, null, true).count());
+        logger.info("  - sans images: " + DBManager.getAnnoncesByCriteria(null, null, null, false).count());
+        logger.info("  - uploaded: " + DBManager.getAnnoncesByCriteria(null, true, null, null).count());
+        logger.info("  - non uploaded: " + DBManager.getAnnoncesByCriteria(null, false, null, null).count());
+        logger.info("  - commerciales: " + DBManager.getAnnoncesByCriteria(null, null, true, null).count());
+        logger.info("  - non commerciales: " + DBManager.getAnnoncesByCriteria(null, null, false, null).count());
+        logger.info("  - avec erreurs: " + DBManager.getAnnoncesByCriteria(true, null, null, null).count());
+        logger.info("  - sans erreurs: " + DBManager.getAnnoncesByCriteria(false, null, null, null).count());
+        logger.info("     - (à uploaded) non commerciales avec images non uploaded sans erreur: "
+                           + DBManager.getAnnoncesByCriteria(false, false, false, true).count());
+	    
+	    
 		if (RESET_DB) {
-			System.out.println("Reseting DB");
+			logger.warn("Reseting DB...");
 			DBManager.resetDB();
 		}
-	   int totalUpAnnonces = UploadManager.countAnnonces();
-	   System.out.println("Total annonces: " + totalUpAnnonces);
-	   System.out.println("MAX_UPLOAD_ADS: " + MAX_UPLOAD_ADS);
-	   int diff = totalUpAnnonces - MAX_UPLOAD_ADS;
-	   System.out.println("diff: " + diff);
+
 	   
 	   if (diff > 0) {	       
 	       UploadManager.removeLastAnnonces(diff);
@@ -48,28 +78,26 @@ public class App {
 	   }
 	   
 	   if (GO_LEECH) {
-		   System.out.println("Go leech");
 		   goLeech();
 	   }
 	   
 	   if (GO_UPLOAD) {
-		System.out.println("Go upload");
         goUpload();    
 	   }
 	}
 
     private static void goUpload () {
-            System.out.println("Start goUpload...");
+            logger.info("Starting goUpload...");
             DBManager.getAnnoncesByCriteria(false, false, false, true).forEach(a -> UploadManager.uploadAnnonceWithImage(a));
-            System.out.println("... goUpload finished!");
+            logger.info("... goUpload finished!");
    }
 
     private static void goLeech() {
-		System.out.println("Start goLeech...");
+		logger.info("Starting goLeech...");
 		App.getSourceStream().flatMap(s -> {
 			return getAnnonceFromSource(s);
 		}).forEach(a -> DBManager.saveAnnonce(a));
-		System.out.println("... goLeech finished!");
+		logger.info("... goLeech finished!");
         }
 
 	private static Stream<Annonce> getAnnonceFromSource(Source source) {
@@ -84,7 +112,7 @@ public class App {
 			AbstractSite site = (AbstractSite) clazz.newInstance();
 			return site.getAnnonces(source.rootUrl, url, rub);
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-			System.err.println("Zuuut !! " + e);
+			logger.error("App.getAnnonce - " + e);
 		}
 		return null;
 	}
@@ -96,7 +124,7 @@ public class App {
 			    
 			    ClassLoader classLoader = App.class.getClassLoader();
 			    File file = new File(classLoader.getResource(source).getFile());
-			    System.out.println("file : " + file);
+			    logger.info("file : " + file);
 			    YamlReader reader = new YamlReader(new FileReader(file));
 			    
 				//YamlReader reader = new YamlReader(new FileReader(source));
@@ -105,7 +133,7 @@ public class App {
 				ret = Stream.concat(ret, wtf.stream());
 			}
 		} catch (Exception e) {
-			System.err.println("Ooops!! " + e);
+			logger.error("App.getSourceStream - " + e);
 		}
 		return ret;
 	}

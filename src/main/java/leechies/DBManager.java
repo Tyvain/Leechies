@@ -17,8 +17,13 @@ import java.util.stream.Stream;
 
 import leechies.model.Annonce;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings("unchecked")
 public class DBManager {
+    final static Logger logger = LoggerFactory.getLogger("DBManager");
+    
     private static String DB_URL = "/projects/Leechies/src/main/resources/AllAdsDB";
 	private static File fileDB = new File(DB_URL);
 	private static FileInputStream fis;
@@ -45,7 +50,7 @@ public class DBManager {
 		// read from file
 		try {
 			Map<String, Annonce> allAds = getAllAnnoncesMap();
-			System.out.println("DB Size: " + allAds.size() + " saving " + annonce.url);
+			//logger.info(" Saving " + annonce.url + "DB Size: " + allAds.size() );
 			allAds.put(annonce.url, annonce);
 			fos = new FileOutputStream(fileDB);
 			oos = new ObjectOutputStream(fos);

@@ -11,6 +11,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 
+import leechies.model.Annonce;
+import leechies.model.Category;
+
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,14 +21,14 @@ import org.json.JSONObject;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import leechies.model.Annonce;
-import leechies.model.Category;
-
 public class UploadManager {
+    final static Logger logger = LoggerFactory.getLogger("UploadManager");
 
     private static String UT      = "39924a52f759ee5de2b10285f8daaadf12a59d4d";
     private static String IDU     = "1"; // id user
@@ -76,28 +79,26 @@ public class UploadManager {
 			        .followRedirects(false)
 			        .execute();
 			        } catch (Exception e) {
-			         System.err.println("Err in removeDefinitlyAds: " + e);
+			         logger.error("RemoveDefinitlyAds - " + e);
 		          }		 
         }
 
     private static HttpURLConnection getFVConnection (int nbLastAnnonces) {
             try {
             URL myUrl = new URL(URL_ADS+"?user_token=39924a52f759ee5de2b10285f8daaadf12a59d4d&items_per_page="+nbLastAnnonces+"&sort=created&status!=50");
-            System.out.println("Calling : " + myUrl);
+            //System.out.println("Calling : " + myUrl);
             HttpURLConnection myURLConnection = (HttpURLConnection)myUrl.openConnection();      
             myURLConnection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
             myURLConnection.setRequestProperty("User-Agent", "Mozilla/5.0");
             myURLConnection.setRequestMethod("GET");
             return myURLConnection;
             } catch (IOException e) {
-                System.err.println("Erreur getFVConnection : " + e);
+                logger.error("GetFVConnection - " + e);
             }
             return null;
          }
 
-        public static void removeLastAnnonces (int nbLastAnnonces) {
-            System.out.println("Removing the last " + nbLastAnnonces + " ads.");
-             
+        public static void removeLastAnnonces (int nbLastAnnonces) {             
            try {
             getLastAnnonces (nbLastAnnonces).forEach(item -> {
                 JSONObject obj = (JSONObject) item;
@@ -121,7 +122,7 @@ public class UploadManager {
            myURLConnection.getInputStream().close(); 
            return json.getJSONArray("ads");
         } catch (IOException | JSONException e) {
-           System.err.println("Erreur getLastAnnonces : " + e);
+            logger.error("GetLastAnnonces - " + e);
           }
           return null;
       }
@@ -149,6 +150,7 @@ public class UploadManager {
                 annonce.error = "Err upload AD: " + e.getMessage();
                 deleteAnnonce(idAd);
                 DBManager.saveAnnonce(annonce);
+                logger.error("uploadAnnonceWithImage - Up Ad - " + annonce + "\n" + e);
                 return;
             }
       
@@ -160,6 +162,7 @@ public class UploadManager {
                       } catch (IOException | URISyntaxException e) {
                         annonce.hasError = true;
                         annonce.error += "Err image: " + img + " - " + e;
+                        logger.error("uploadAnnonceWithImage - Up Img - " + img + " - " + annonce + "\n" + e);
                         }                  
                 }
       
@@ -210,7 +213,7 @@ public class UploadManager {
             .data("user_token", UT)
             .post();
         } catch (IOException e) {
-           System.err.println("Erreur deleteAnnonce : " + e);
+           logger.error("DeleteAnnonce - " + e);
         }  
         removeDefinitlyAds(idAd);
     }
