@@ -7,12 +7,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
-
-import leechies.model.Annonce;
-import leechies.model.Category;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
@@ -26,6 +24,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+
+import leechies.model.Annonce;
+import leechies.model.Category;
+import leechies.model.Location;
 
 public class UploadManager {
     final static Logger logger = LoggerFactory.getLogger("UploadManager");
@@ -159,10 +161,9 @@ public class UploadManager {
                    try {
                     uploadImage(img, idAd);
                     imageSucceedUpload++;
-                      } catch (IOException | URISyntaxException e) {
+                      } catch (IOException e) {
                         annonce.hasError = true;
                         annonce.error += "Err image: " + img + " - " + e;
-                        logger.error("uploadAnnonceWithImage - Up Img - " + img + " - " + annonce + "\n" + e);
                         }                  
                 }
       
@@ -178,6 +179,7 @@ public class UploadManager {
 
     public static String uploadAnnonce(Annonce annonce) throws IOException {
         int cat = Category.getCategoryFromLibelle(annonce.category).id;
+        String location =  Location.getIdByLocation(annonce.ville);
         Document doc = getConnectionAdService(URL_ADS)
                 .data("id_user", IDU)
                 .data("id_category", ""+cat)
@@ -186,7 +188,7 @@ public class UploadManager {
                 .data("user_token", UT)
                 .data("website", annonce.url)
                 .data("price", annonce.prix)
-                .data("address", annonce.ville)
+                .data("id_location",location!=null?location:"")
                 .post();
 
         String myJSONString = doc.text();
@@ -194,18 +196,35 @@ public class UploadManager {
         return "" + jobj.get("ad").getAsJsonObject().get("id_ad");
     }
     
-    public static void uploadImage(String u, String adId) throws IOException, URISyntaxException {
+    public static void uploadImage(String u, String adId) throws IOException {
         // create file
-        URL url = new URL(u.replaceAll(" ", "%20"));
+        URL url = null;
+		try {
+			url = new URL(u.replaceAll(" ", "%20"));
+		} catch (MalformedURLException e1) {
+			logger.error("UploadImage - URL - " + e1);
+			throw e1;
+		}
         File file = new File("./temp.jpg");
-        FileUtils.copyURLToFile(url, file);        
+        try {
+			FileUtils.copyURLToFile(url, file);
+		} catch (IOException e) {
+			logger.error("UploadImage - copyURLToFile - " + u + " - " + adId + "\n" + e);
+			throw e;
+		}        
         
         // upload image
-        getConnectionAdService(URL_ADS_IMAGE+adId) 
-        .data("image", file.getName(), new FileInputStream(file))
-        .data("user_token", UT)
-        .post();       
-        }
+        try {
+			getConnectionAdService(URL_ADS_IMAGE+adId) 
+			.data("image", file.getName(), new FileInputStream(file))
+			.data("user_token", UT)
+			.timeout(60000)
+			.post();
+		} catch (IOException e) {
+			logger.error("UploadImage - getConnectionAdService - " + u + " - " + adId + "\n" + e);
+			throw e;
+	    }
+    }
     
     
     public static void deleteAnnonce (String idAd) {
@@ -217,32 +236,5 @@ public class UploadManager {
            logger.error("DeleteAnnonce - " + e);
         }  
         removeDefinitlyAds(idAd);
-    }
-
-    public static void main(String[] args) throws IOException, URISyntaxException {
-        
-       // System.out.println("wtf");
-       // deleteAnnonce("6651"); 
-
-       /*URL url = new URL("http://immonc.com/photos/photos_big/5265305_1461800535_port du sud chaaf (6).JPG");
-        File file = new File("/projects/Leechies/temp2.jpg");
-        
-        System.out.println("Creating file...");    
-        FileUtils.copyURLToFile(url, file);
-        System.out.println("File created!");  */
-        
-        //
-      
-      
-      Annonce test = new Annonce();
-        test.titre="testTitle 2";
-        test.texte="<a href='www.google.com'>annonce d'origine</a>";
-        test.category = Category.ACCESSOIRES_BIJOUX.libelle;
-        test.url="http://www.google.com";
-        test.prix="0";
-        String newAdId = uploadAnnonce(test); 
-        
-        System.out.println("Annonce créée : " + newAdId);      
-        //uploadImage("http://thiswallpaper.com/cdn/hdwallpapers/747/cute%20pomeranian%20small%20dog%20high%20resolution%20wallpaper.jpg", "5545");
     }
 }
