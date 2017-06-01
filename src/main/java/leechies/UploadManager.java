@@ -13,6 +13,7 @@ import java.net.URL;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,42 +49,42 @@ public class UploadManager {
            return getLastAnnonces(Integer.MAX_VALUE).length();
     }
 
-    public static void removeDefinitlyAds(String idAd) {
-        try{
-         Connection.Response response = Jsoup
-			        .connect("https://yclas.com/panel/auth/login")
-			        .header("accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
-					.header("content-type","application/x-www-form-urlencoded")
-					.header("origin","https://yclas.com")
-					.header("referer","https://yclas.com/")
-					.header("upgrade-insecure-requests","1")
-					.header("user-agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
-					.data("email", "tyvain@gmail.com")
-					.data("password", "billy2000")
-					.data("remember", "on")
-					.data("auth_redirect", "https://yclas.com/")
-					.data("csrf_login", "Rn6h3tmdU2zVEK9QVec09b")
-			        .method(Connection.Method.POST)
-			        .followRedirects(false)
-			        .execute();
-
-		 String session = response.cookies().get("session");
-		 String cfduid = response.cookies().get("__cfduid");
-				 Jsoup
-			        .connect("http://finvalab.com/oc-panel/ad/delete?id_ads%5B%5D="+idAd)
-			        .header("Accept-Language","en-US,en;q=0.8,fr;q=0.6")
-					.header("Upgrade-Insecure-Requests","1")
-					.header("User-Agent","Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36")
-					.header("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
-					.header("Referer","http://finvalab.com/oc-panel/ad?status=50")
-					.header("Cookie","sentry-cookies-test=1493268748648; sentry-cookies-test=1493269907979; __cfduid="+cfduid+"; yclasBarMinimized=1; sentry-cookies-test=1492720481433; viewedOuibounceModal=true; list/grid=1; __unam=7639673-15a0feef3d0-26062f01-208; _ga=GA1.2.1810652207.1485810373; _gid=GA1.2.1684047997.1495053567; _gat=1; authautologin=5b2417368f5e54876e9eeece79781ef62057e938%7Ef9fd679b48576e5d7e00ab2e921075560128c783; session="+session+"; sidebar_state=not-collapsed; user_language=ae4e139c2d7dc60f1ce21d13c230d568754ecc19%7Efr_FR; theme=57323fbc3039feb5cae3d8a9c7c59efd57801cb5%7Ereclassifieds; skin_reclassifieds=e1badbc5175bf41293c957aad5ebf362876e3915%7Eblue")				
-			        .method(Connection.Method.GET)
-			        .followRedirects(false)
-			        .execute();
-			        } catch (Exception e) {
-			         logger.error("RemoveDefinitlyAds - " + e);
-		          }		 
-        }
+//    public static void removeDefinitlyAds(String idAd) {
+//        try{
+//         Connection.Response response = Jsoup
+//			        .connect("https://yclas.com/panel/auth/login")
+//			        .header("accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+//					.header("content-type","application/x-www-form-urlencoded")
+//					.header("origin","https://yclas.com")
+//					.header("referer","https://yclas.com/")
+//					.header("upgrade-insecure-requests","1")
+//					.header("user-agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
+//					.data("email", "tyvain@gmail.com")
+//					.data("password", "billy2000")
+//					.data("remember", "on")
+//					.data("auth_redirect", "https://yclas.com/")
+//					.data("csrf_login", "Rn6h3tmdU2zVEK9QVec09b")
+//			        .method(Connection.Method.POST)
+//			        .followRedirects(false)
+//			        .execute();
+//
+//		 String session = response.cookies().get("session");
+//		 String cfduid = response.cookies().get("__cfduid");
+//				 Jsoup
+//			        .connect("http://finvalab.com/oc-panel/ad/delete?id_ads%5B%5D="+idAd)
+//			        .header("Accept-Language","en-US,en;q=0.8,fr;q=0.6")
+//					.header("Upgrade-Insecure-Requests","1")
+//					.header("User-Agent","Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36")
+//					.header("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+//					.header("Referer","http://finvalab.com/oc-panel/ad?status=50")
+//					.header("Cookie","sentry-cookies-test=1493268748648; sentry-cookies-test=1493269907979; __cfduid="+cfduid+"; yclasBarMinimized=1; sentry-cookies-test=1492720481433; viewedOuibounceModal=true; list/grid=1; __unam=7639673-15a0feef3d0-26062f01-208; _ga=GA1.2.1810652207.1485810373; _gid=GA1.2.1684047997.1495053567; _gat=1; authautologin=5b2417368f5e54876e9eeece79781ef62057e938%7Ef9fd679b48576e5d7e00ab2e921075560128c783; session="+session+"; sidebar_state=not-collapsed; user_language=ae4e139c2d7dc60f1ce21d13c230d568754ecc19%7Efr_FR; theme=57323fbc3039feb5cae3d8a9c7c59efd57801cb5%7Ereclassifieds; skin_reclassifieds=e1badbc5175bf41293c957aad5ebf362876e3915%7Eblue")				
+//			        .method(Connection.Method.GET)
+//			        .followRedirects(false)
+//			        .execute();
+//			        } catch (Exception e) {
+//			         logger.error("RemoveDefinitlyAds - " + e);
+//		          }		 
+//        }
 
     private static HttpURLConnection getFVConnection (int nbLastAnnonces) {
             try {
@@ -189,6 +190,7 @@ public class UploadManager {
                 .data("website", annonce.url)
                 .data("price", annonce.prix)
                 .data("id_location",location!=null?location:"")
+                .timeout(60000)
                 .post();
 
         String myJSONString = doc.text();
@@ -202,7 +204,7 @@ public class UploadManager {
 		try {
 			url = new URL(u.replaceAll(" ", "%20"));
 		} catch (MalformedURLException e1) {
-			logger.error("UploadImage - URL - " + e1);
+			logger.error("UploadImage - URL" + "\nu: " + u + "\nadId:" + adId + "\nurl: " + url  + "\nerr:" + e1);
 			throw e1;
 		}
         File file = new File("./temp.jpg");
@@ -227,14 +229,13 @@ public class UploadManager {
     }
     
     
-    public static void deleteAnnonce (String idAd) {
-        try {
-            getConnectionAdService(URL_ADS+"/delete/"+idAd) 
-            .data("user_token", UT)
-            .post();
-        } catch (IOException e) {
-           logger.error("DeleteAnnonce - " + e);
-        }  
-        removeDefinitlyAds(idAd);
-    }
+	public static void deleteAnnonce(String idAd) {
+		if (!StringUtils.isEmpty(idAd)) {
+			try {
+				getConnectionAdService(URL_ADS + "/delete/" + idAd).data("user_token", UT).post();
+			} catch (IOException e) {
+				logger.error("DeleteAnnonce - " + e);
+			}
+		}
+	}
 }
