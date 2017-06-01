@@ -19,8 +19,8 @@ import com.esotericsoftware.yamlbeans.YamlReader;
 public class App {
     final static Logger logger = LoggerFactory.getLogger("App");
 
-	public static String ALL_SOURCES[] =  { "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml", "sources-immonc.yml" };
-	//public static String ALL_SOURCES[] =  { "sources-vehicules.yml" };
+	//public static String ALL_SOURCES[] =  { "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml", "sources-immonc.yml" };
+	public static String ALL_SOURCES[] =  { "sources-immonc.yml" };
 	public static String SOURCES[] = ALL_SOURCES;
 
 	// # !!!
@@ -30,10 +30,10 @@ public class App {
 	
 	private static int MAX_UPLOAD_ADS = 4000; // max ads on website	
 	private static boolean GO_LEECH = true; // leech + DB insert
-	private static boolean GO_UPLOAD = true; // upload ads
+	private static boolean GO_UPLOAD = false; // upload ads
 
 	public static void main(String[] args) throws IOException, URISyntaxException {
-	    
+	    /*
 	    logger.info("### PARAMS ### " );
 	    logger.info("ALL_SOURCES: " + ALL_SOURCES);
 	    logger.info("SOURCES: " + SOURCES);
@@ -44,11 +44,11 @@ public class App {
 	    logger.info("GO_UPLOAD: " + GO_UPLOAD);
 	    
 	    
-	    logger.info("### INFOS ### " );
+	    logger.info("### INFOS ### " );*/
 	    int totalUpAnnonces = UploadManager.countAnnonces();
 	    logger.info("-- Total Ads online: " + totalUpAnnonces);	   
 	    int diff = totalUpAnnonces - MAX_UPLOAD_ADS;
-	    
+	    /*
 	    logger.info("-- LOCAL DB");
         logger.info("Nombre d'annonces: " + totalUpAnnonces);
         logger.info("  - avec images: " + DBManager.getAnnoncesByCriteria(null, null, null, true).count());
@@ -62,7 +62,7 @@ public class App {
         logger.info("     - (à uploaded) non commerciales avec images non uploaded sans erreur: "
                            + DBManager.getAnnoncesByCriteria(false, false, false, true).count());
 	    
-	    
+	    */
 		if (RESET_DB) {
 			logger.warn("Reseting DB...");
 			DBManager.resetDB();

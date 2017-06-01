@@ -47,6 +47,18 @@ public class ImmoncSite extends AbstractSite {
         return stringArray;
     }
 
+    @Override
+    protected String getVille(Document doc) {
+        //.property-title > span:nth-child(2)
+		String lieu=doc.select(".property-title > span:nth-child(2)").text();		
+        System.out.println("1. lieu: " + lieu);
+        
+        if (lieu != null && lieu.length() > 0){
+            lieu = lieu.substring(0, lieu.indexOf('>'));
+        }
+        System.out.println("2. lieu: " + lieu);		
+		return lieu;        
+    };
     
 	@Override
 	protected String getPrixFromDoc(Document doc) {

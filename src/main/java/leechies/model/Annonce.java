@@ -18,6 +18,7 @@ public class Annonce implements Serializable {
 	public Date uploadedTime=null; // date d'envoi sur finvalab
 	public boolean hasError=false; // annonce en erreur
 	public String error="";
+	public String ville=null;
 
 	
 	@Override

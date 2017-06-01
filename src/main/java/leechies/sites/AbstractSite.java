@@ -25,6 +25,10 @@ public abstract class AbstractSite {
 	protected abstract String getImageSelector();
 
 	protected abstract String getPrixFromDoc(Document doc);
+	
+	protected String getVille(Document doc) {
+	    return null;
+	 }
 
 	public Stream<Annonce> getAnnonces(String rootUrl, String rubUrl, String rub) {
 		System.out.println("url: " + rootUrl + rubUrl);
@@ -77,6 +81,7 @@ public abstract class AbstractSite {
 		ret.imgs = getImagesFromDoc(doc, rootUrl);
 		ret.isCommerciale = ret.texte.contains("Annonce Commerciale");
 		ret.prix = getPrixFromDoc(doc);
+		ret.ville = getVille(doc);
 		return ret;
 	}
 

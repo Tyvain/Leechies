@@ -186,6 +186,7 @@ public class UploadManager {
                 .data("user_token", UT)
                 .data("website", annonce.url)
                 .data("price", annonce.prix)
+                .data("address", annonce.ville)
                 .post();
 
         String myJSONString = doc.text();
