@@ -45,7 +45,10 @@ public class Location {
         map.put("Yaté", "135");
     }
 
-    public static String getIdByLocation(String location) {    
+    public static String getIdByLocation(String location) {
+        if (location == null) {
+            return null;
+            }
         String key = location.replace("Païta", "paita").trim();
         key = key.replace("Mont-Dore", "le-mont-dore");       
 

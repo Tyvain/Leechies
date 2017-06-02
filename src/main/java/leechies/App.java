@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import leechies.model.Annonce;
@@ -15,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.esotericsoftware.yamlbeans.YamlReader;
+
 
 public class App {
     final static Logger logger = LoggerFactory.getLogger("App");
@@ -29,39 +34,34 @@ public class App {
 	// # !!!
 	
 	private static int MAX_UPLOAD_ADS = 4000; // max ads on website	
-	private static boolean GO_LEECH = true; // leech + DB insert
-	private static boolean GO_UPLOAD = true; // upload ads
+	private static int LOG_ADS_EVERY  = 10; // log every x ads
 
 	public static void main(String[] args) throws IOException, URISyntaxException {
+	    int counter = 1;	    
 	    
-	    logger.info("### PARAMS ### " );
-	    logger.info("ALL_SOURCES: " + ALL_SOURCES);
-	    logger.info("SOURCES: " + SOURCES);
-	    logger.info("FORCE_REMOVE_UPLOAD_ADS: " + FORCE_REMOVE_UPLOAD_ADS);
-	    logger.info("RESET_DB: " + RESET_DB);
-	    logger.info("MAX_UPLOAD_ADS: " + MAX_UPLOAD_ADS);
-	    logger.info("GO_LEECH: " + GO_LEECH);
-	    logger.info("GO_UPLOAD: " + GO_UPLOAD);
-	    
-	    
-	    logger.info("### INFOS ### " );
+	    while (true) {
 	    int totalUpAnnonces = UploadManager.countAnnonces();
-	    logger.info("-- Total Ads online: " + totalUpAnnonces);	   
 	    int diff = totalUpAnnonces - MAX_UPLOAD_ADS;
+	    	    
+	    String initTrace = "\n### PARAMS ### Lancement N° " + counter++;
+	    initTrace += "\nSOURCES: " + SOURCES.length;
+	    initTrace += "\nFORCE_REMOVE_UPLOAD_ADS: " + FORCE_REMOVE_UPLOAD_ADS;
+	    initTrace += "\nRESET_DB: " + RESET_DB;
+	    initTrace += "\nMAX_UPLOAD_ADS: " + MAX_UPLOAD_ADS;	    
+	    initTrace += "\n### INFOS ### " ;	    
+	    initTrace += "\n-- Total Ads online: " + totalUpAnnonces;	   	    
+	    initTrace += "\n-- LOCAL DB";
+        initTrace += "\nNombre d'annonces: " + totalUpAnnonces;
+        initTrace += "\n  - avec images: " + DBManager.getAnnoncesByCriteria(null, null, null, true).count();
+        initTrace += "\n  - sans images: " + DBManager.getAnnoncesByCriteria(null, null, null, false).count();
+        initTrace += "\n  - uploaded: " + DBManager.getAnnoncesByCriteria(null, true, null, null).count();
+        initTrace += "\n  - non uploaded: " + DBManager.getAnnoncesByCriteria(null, false, null, null).count();
+        initTrace += "\n  - commerciales: " + DBManager.getAnnoncesByCriteria(null, null, true, null).count();
+        initTrace += "\n  - non commerciales: " + DBManager.getAnnoncesByCriteria(null, null, false, null).count();
+        initTrace += "\n  - avec erreurs: " + DBManager.getAnnoncesByCriteria(true, null, null, null).count();
+        initTrace += "\n  - sans erreurs: " + DBManager.getAnnoncesByCriteria(false, null, null, null).count();    
 	    
-	    logger.info("-- LOCAL DB");
-        logger.info("Nombre d'annonces: " + totalUpAnnonces);
-        logger.info("  - avec images: " + DBManager.getAnnoncesByCriteria(null, null, null, true).count());
-        logger.info("  - sans images: " + DBManager.getAnnoncesByCriteria(null, null, null, false).count());
-        logger.info("  - uploaded: " + DBManager.getAnnoncesByCriteria(null, true, null, null).count());
-        logger.info("  - non uploaded: " + DBManager.getAnnoncesByCriteria(null, false, null, null).count());
-        logger.info("  - commerciales: " + DBManager.getAnnoncesByCriteria(null, null, true, null).count());
-        logger.info("  - non commerciales: " + DBManager.getAnnoncesByCriteria(null, null, false, null).count());
-        logger.info("  - avec erreurs: " + DBManager.getAnnoncesByCriteria(true, null, null, null).count());
-        logger.info("  - sans erreurs: " + DBManager.getAnnoncesByCriteria(false, null, null, null).count());
-        logger.info("     - (à uploaded) non commerciales avec images non uploaded sans erreur: "
-                           + DBManager.getAnnoncesByCriteria(false, false, false, true).count());
-	    
+	    logger.info(initTrace);
 	    
 		if (RESET_DB) {
 			logger.warn("Reseting DB...");
@@ -77,26 +77,45 @@ public class App {
 		   UploadManager.removeLastAnnonces(FORCE_REMOVE_UPLOAD_ADS);
 	   }
 	   
-	   if (GO_LEECH) {
-		   goLeech();
-	   }
-	   
-	   if (GO_UPLOAD) {
-        goUpload();    
+	   goLeech();	   
 	   }
 	}
 
-    private static void goUpload () {
+/*    private static void goUpload () {
             logger.info("Starting goUpload...");
             DBManager.getAnnoncesByCriteria(false, false, false, true).forEach(a -> UploadManager.uploadAnnonceWithImage(a));
             logger.info("... goUpload finished!");
-   }
+   }*/
 
     private static void goLeech() {
+        final AtomicInteger count = new AtomicInteger();
+        final AtomicLong avgTimeByAds = new AtomicLong();
+        final Instant start = Instant.now();
+        
 		logger.info("Starting goLeech...");
-		App.getSourceStream().flatMap(s -> {
+		App.getSourceStream()
+		.flatMap(s -> {
 			return getAnnonceFromSource(s);
-		}).forEach(a -> DBManager.saveAnnonce(a));
+		})
+		.forEach(a -> {
+		      DBManager.saveAnnonce(a);
+		      
+		      
+		      if (a.hasError == false && a.isCommerciale == false && (a.imgs != null && a.imgs.length > 0)) {
+		          System.out.println("uploading ad: " + a);
+		          UploadManager.uploadAnnonceWithImage(a);		
+		      }
+		      
+		      Duration duration = Duration.between(start, Instant.now());
+		      avgTimeByAds.set(duration.getSeconds() / count.incrementAndGet());
+		      		      
+		      // on trace toutes les x annonces
+		      if (count.get() % 10 == 0) {
+		          String msg = "Nb annonces traitées: " + count.get() + "\nTemps moyen par annonce: " + avgTimeByAds + " sec"; 
+		          logger.info(msg);
+		          System.out.println(msg);
+		      }
+		    });
 		logger.info("... goLeech finished!");
         }
 
