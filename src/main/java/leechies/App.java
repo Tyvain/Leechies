@@ -24,8 +24,8 @@ import com.esotericsoftware.yamlbeans.YamlReader;
 public class App {
     final static Logger logger = LoggerFactory.getLogger("App");
 
-	public static String ALL_SOURCES[] =  { "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml", "sources-immonc.yml" };
-	//public static String ALL_SOURCES[] =  { "sources-immonc.yml" };
+	//public static String ALL_SOURCES[] =  { "sources-immonc.yml", "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml" };
+	public static String ALL_SOURCES[] =  { "sources-immonc.yml" };
 	public static String SOURCES[] = ALL_SOURCES;
 
 	// # !!!
@@ -51,7 +51,6 @@ public class App {
 	    initTrace += "\n### INFOS ### " ;	    
 	    initTrace += "\n-- Total Ads online: " + totalUpAnnonces;	   	    
 	    initTrace += "\n-- LOCAL DB";
-        initTrace += "\nNombre d'annonces: " + totalUpAnnonces;
         initTrace += "\n  - avec images: " + DBManager.getAnnoncesByCriteria(null, null, null, true).count();
         initTrace += "\n  - sans images: " + DBManager.getAnnoncesByCriteria(null, null, null, false).count();
         initTrace += "\n  - uploaded: " + DBManager.getAnnoncesByCriteria(null, true, null, null).count();
