@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 
@@ -139,7 +138,7 @@ public class UploadManager {
         return sb.toString();
     }
 
-    public static void uploadAnnonceWithImage(Annonce annonce) {
+    public static boolean uploadAnnonceWithImage(Annonce annonce) {
             AnnonceCleaner.cleanAnnonce(annonce);
         
             String idAd=null;
@@ -154,7 +153,7 @@ public class UploadManager {
                 deleteAnnonce(idAd);
                 DBManager.saveAnnonce(annonce);
                 logger.error("uploadAnnonceWithImage - Up Ad - " + annonce + "\n" + e);
-                return;
+                return false;
             }
       
             int imageSucceedUpload=0;            
@@ -174,8 +173,10 @@ public class UploadManager {
                 annonce.uploadedTime = new Date();                
             } else { // aucune image -> on delete                 
                     deleteAnnonce(idAd);
+                    return false;
             }
             DBManager.saveAnnonce(annonce);  
+            return true;
         }
 
     public static String uploadAnnonce(Annonce annonce) throws IOException {

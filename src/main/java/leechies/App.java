@@ -23,14 +23,17 @@ import com.esotericsoftware.yamlbeans.YamlReader;
 
 public class App {
     final static Logger logger = LoggerFactory.getLogger("App");
+    
+    static int statNbAnnoncesTraitees = 0;
+    static int statNbAnnoncesUploadees = 0;
 
-	//public static String ALL_SOURCES[] =  { "sources-immonc.yml", "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml" };
-	public static String ALL_SOURCES[] =  { "sources-immonc.yml" };
+	public static String ALL_SOURCES[] =  { "sources-immonc.yml", "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml" };
+	//public static String ALL_SOURCES[] =  { "sources-immonc.yml" };
 	public static String SOURCES[] = ALL_SOURCES;
 
 	// # !!!
 	private static int FORCE_REMOVE_UPLOAD_ADS= 0; // remove the last x ads from website
-	private static boolean RESET_DB = false; // reset local DB (backup old one)
+	private static boolean RESET_DB = true; // reset local DB (backup old one)
 	// # !!!
 	
 	private static int MAX_UPLOAD_ADS = 4000; // max ads on website	
@@ -38,12 +41,11 @@ public class App {
 
 	public static void main(String[] args) throws IOException, URISyntaxException {
 	    int counter = 1;	    
-	    
-	    while (true) {
 	    int totalUpAnnonces = UploadManager.countAnnonces();
 	    int diff = totalUpAnnonces - MAX_UPLOAD_ADS;
-	    	    
-	    String initTrace = "\n### PARAMS ### Lancement N° " + counter++;
+	    final Instant start = Instant.now();
+	    	    	    
+	    String initTrace = "\n### DEBUT ### Lancement N° " + counter++;
 	    initTrace += "\nSOURCES: " + SOURCES.length;
 	    initTrace += "\nFORCE_REMOVE_UPLOAD_ADS: " + FORCE_REMOVE_UPLOAD_ADS;
 	    initTrace += "\nRESET_DB: " + RESET_DB;
@@ -62,6 +64,8 @@ public class App {
 	    
 	    logger.info(initTrace);
 	    
+	    DBManager.archiveDB();
+	    
 		if (RESET_DB) {
 			logger.warn("Reseting DB...");
 			DBManager.resetDB();
@@ -76,8 +80,13 @@ public class App {
 		   UploadManager.removeLastAnnonces(FORCE_REMOVE_UPLOAD_ADS);
 	   }
 	   
-	   goLeech();	   
-	   }
+	   goLeech();
+	   
+	   Duration duration = Duration.between(start, Instant.now());
+	   String endTrace = "\n### FIN ### Lancement N° " + counter;
+	   endTrace += "\nTemps toal: " + duration.getSeconds() + " sec";
+	   endTrace += "\nstatNbAnnoncesTraitees: " + statNbAnnoncesTraitees;
+	   endTrace += "\nstatNbAnnoncesUploadees: " + statNbAnnoncesUploadees;
 	}
 
 /*    private static void goUpload () {
@@ -97,20 +106,23 @@ public class App {
 			return getAnnonceFromSource(s);
 		})
 		.forEach(a -> {
-		      DBManager.saveAnnonce(a);
-		      
+		      DBManager.saveAnnonce(a);		      
 		      
 		      if (a.hasError == false && a.isCommerciale == false && (a.imgs != null && a.imgs.length > 0)) {
 		          System.out.println("uploading ad: " + a);
-		          UploadManager.uploadAnnonceWithImage(a);		
+		          boolean isUploadSuccess = UploadManager.uploadAnnonceWithImage(a);
+		          statNbAnnoncesTraitees++;
+		          if (isUploadSuccess) {
+		        	  statNbAnnoncesUploadees++;
+		          }
 		      }
 		      
 		      Duration duration = Duration.between(start, Instant.now());
 		      avgTimeByAds.set(duration.getSeconds() / count.incrementAndGet());
 		      		      
 		      // on trace toutes les x annonces
-		      if (count.get() % 10 == 0) {
-		          String msg = "Nb annonces traitées: " + count.get() + "\nTemps moyen par annonce: " + avgTimeByAds + " sec"; 
+		      if (count.get() % LOG_ADS_EVERY == 0) {
+		          String msg = "Nb annonces traitées: " + count.get() + "\nTemps moyen par annonce: " + avgTimeByAds + " sec";		          
 		          logger.info(msg);
 		          System.out.println(msg);
 		      }

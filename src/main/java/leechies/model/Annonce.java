@@ -37,7 +37,7 @@ public class Annonce implements Serializable {
 		String ret = "\nurl : "+ url;
 		ret += "\ncategory : "+ category;
 		ret += "\ntitre : "+ titre;
-		ret += "\ntexte : "+ texte;
+		ret += "\ntexte : "+ texte.substring(50);
 		ret += "\nprix : "+ prix;
 		ret += "\nisCommerciale : "+ isCommerciale;
 		ret += "\nuploadedTime : "+ uploadedTime;

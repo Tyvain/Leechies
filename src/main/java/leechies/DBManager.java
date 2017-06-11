@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public class DBManager {
     final static Logger logger = LoggerFactory.getLogger("DBManager");
     
-    private static String DB_URL = "/projects/Leechies/src/main/resources/AllAdsDB";
+    private static String DB_URL = "/projects/db/AllAdsDB";
 	private static File fileDB = new File(DB_URL);
 	private static FileInputStream fis;
 	private static ObjectInputStream ois;
@@ -32,8 +32,14 @@ public class DBManager {
 	private static ObjectOutputStream oos;
 	private static Map<String, Annonce> allAds;
 
+	public static void archiveDB() throws IOException {
+		String fileName = DB_URL+"_BACKUP_"+new Date();
+		fileName  = fileName.replaceAll("\\s+","");
+		Files.copy(fileDB.toPath(), Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
+	}
+	
     public static void resetDB () throws IOException {
-        Files.copy(fileDB.toPath(), Paths.get(DB_URL+"_BACKUP_"+new Date()), StandardCopyOption.REPLACE_EXISTING);
+    		archiveDB();
 		try {
 			fos = new FileOutputStream(fileDB);
 			oos = new ObjectOutputStream(fos);
@@ -42,7 +48,7 @@ public class DBManager {
 			fos.close();
 			oos.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("resetDB: " + e);
 		}
     }
 
@@ -59,7 +65,7 @@ public class DBManager {
 			fos.close();
 			oos.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("saveAnnonce: " + e);
 		}
 	}
 
@@ -74,10 +80,9 @@ public class DBManager {
 			fis.close();
 			ois.close();
 			return allAds;
-		} catch (ClassNotFoundException | IOException e) {
-			
-			e.printStackTrace();
-			return null;
+		} catch (ClassNotFoundException | IOException e) {			
+			logger.error("getAllAnnoncesMap (Empty DB file?): " + e);
+			return new HashMap<String, Annonce>();
 		}
 
 	}

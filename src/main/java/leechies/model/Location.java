@@ -2,6 +2,7 @@ package leechies.model;
 
 import java.util.HashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,11 +47,11 @@ public class Location {
     }
 
     public static String getIdByLocation(String location) {
-        if (location == null) {
+        if (StringUtils.isEmpty(location)) {
             return null;
-            }
-        String key = location.replace("Païta", "paita").trim();
-        key = key.replace("Mont-Dore", "le-mont-dore");       
+         }
+        String key = location.replace("paita", "").trim();
+        key = key.replace("le-mont-dore", "Mont-Dore");        
 
         String id = map.get(key);
         
