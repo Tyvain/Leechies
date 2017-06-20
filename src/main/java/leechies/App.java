@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
@@ -25,7 +26,9 @@ public class App {
     final static Logger logger = LoggerFactory.getLogger("App");
     
     static int statNbAnnoncesTraitees = 0;
-    static int statNbAnnoncesUploadees = 0;
+    static int statNbAnnoncesUploadees = 0;    
+    static int statNbAnnoncesAlreadyInDB = 0;
+    static int statNbNotAlreadyInDB = 0;
 
 	public static String ALL_SOURCES[] =  { "sources-immonc.yml", "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml" };
 	//public static String ALL_SOURCES[] =  { "sources-immonc.yml" };
@@ -33,19 +36,18 @@ public class App {
 
 	// # !!!
 	private static int FORCE_REMOVE_UPLOAD_ADS= 0; // remove the last x ads from website
-	private static boolean RESET_DB = true; // reset local DB (backup old one)
+	private static boolean RESET_DB = false; // reset local DB (backup old one)
 	// # !!!
 	
 	private static int MAX_UPLOAD_ADS = 4000; // max ads on website	
 	private static int LOG_ADS_EVERY  = 10; // log every x ads
 
-	public static void main(String[] args) throws IOException, URISyntaxException {
-	    int counter = 1;	    
+	public static void main(String[] args) throws IOException, URISyntaxException {   
 	    int totalUpAnnonces = UploadManager.countAnnonces();
 	    int diff = totalUpAnnonces - MAX_UPLOAD_ADS;
 	    final Instant start = Instant.now();
 	    	    	    
-	    String initTrace = "\n### DEBUT ### Lancement N° " + counter++;
+	    String initTrace = "\n### DEBUT ### " ;
 	    initTrace += "\nSOURCES: " + SOURCES.length;
 	    initTrace += "\nFORCE_REMOVE_UPLOAD_ADS: " + FORCE_REMOVE_UPLOAD_ADS;
 	    initTrace += "\nRESET_DB: " + RESET_DB;
@@ -83,10 +85,13 @@ public class App {
 	   goLeech();
 	   
 	   Duration duration = Duration.between(start, Instant.now());
-	   String endTrace = "\n### FIN ### Lancement N° " + counter;
-	   endTrace += "\nTemps toal: " + duration.getSeconds() + " sec";
+	   String endTrace = "\n### FIN ### ";
+	   endTrace += "\nTemps toal: " + duration.getSeconds() / 60 + " min";
 	   endTrace += "\nstatNbAnnoncesTraitees: " + statNbAnnoncesTraitees;
 	   endTrace += "\nstatNbAnnoncesUploadees: " + statNbAnnoncesUploadees;
+	   endTrace += "\nstatNbAnnoncesAlreadyInDB:" + statNbAnnoncesAlreadyInDB;
+	   endTrace += "\nstatNbNotAlreadyInDB:" + statNbNotAlreadyInDB;
+	   logger.info(endTrace);
 	}
 
 /*    private static void goUpload () {
@@ -132,15 +137,22 @@ public class App {
 
 	private static Stream<Annonce> getAnnonceFromSource(Source source) {
 		return source.rubriques.stream()
-				.flatMap(r -> r.subUrls.stream().flatMap(u -> App.getAnnonce(source, u, r.category.libelle)));
+				.flatMap(r -> r.subUrls.stream().flatMap(u -> App.getAnnonce(source, u, r.category.libelle).get()));
 	}
 
-	private static Stream<Annonce> getAnnonce(Source source, String url, String rub) {
+	private static Optional<Stream<Annonce>> getAnnonce(Source source, String url, String rub) {
 		Class<?> clazz;
 		try {
+
+			// on eleve les urls qui existent deja
+			if (DBManager.annonceExists(url)) {
+				statNbAnnoncesAlreadyInDB++;
+				return Optional.empty();
+			}
+			statNbNotAlreadyInDB++;
 			clazz = Class.forName(source.className);
 			AbstractSite site = (AbstractSite) clazz.newInstance();
-			return site.getAnnonces(source.rootUrl, url, rub);
+			return Optional.of(site.getAnnonces(source.rootUrl, url, rub));
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			logger.error("App.getAnnonce - " + e);
 		}
