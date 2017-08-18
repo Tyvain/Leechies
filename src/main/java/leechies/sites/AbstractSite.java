@@ -1,6 +1,7 @@
 package leechies.sites;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import leechies.DBManager;
@@ -29,6 +30,17 @@ public abstract class AbstractSite {
 	protected String getVille(Document doc) {
 	    return null;
 	 }
+	
+	/* TODO
+	 * 			// on eleve les urls qui existent deja
+			if (DBManager.annonceExists(url)) {
+				logger.info(url + "->exists in db!");
+				statNbAnnoncesAlreadyInDB++;
+				return Optional.empty();
+			}
+			logger.info(url + "->NOT exists in db!");
+			statNbNotAlreadyInDB++;
+	 */
 
 	public Stream<Annonce> getAnnonces(String rootUrl, String rubUrl, String rub) {
 		// liste des docs (cas des pages contenant les liens)  
@@ -43,11 +55,8 @@ public abstract class AbstractSite {
 		// liste des urls
 		Stream<String> urlz = idz.map(s -> buildUrl(rootUrl, s));
 
-		// on eleve les urls qui existent deja
-		Stream<String> newUrlz = urlz.filter(u -> !DBManager.annonceExists(u));
-
 		// liste des annonces        
-		Stream<Annonce> ret = newUrlz.map(u -> getAnnonceFromUrl(u, rootUrl, rub));
+		Stream<Annonce> ret = urlz.map(u -> getAnnonceFromUrl(u, rootUrl, rub));
 		return ret;
 	}
 
@@ -56,6 +65,10 @@ public abstract class AbstractSite {
 	}
 
 	protected Annonce getAnnonceFromUrl(String url, String rootUrl, String rub) {
+		
+		if (DBManager.annonceExists(url)) {
+			return DBManager.getAnnoncesByUrl(url).get();
+		}
 		Document doc = getDocumentFromUrl(url);
 		if (doc == null) {
 			Annonce ret = new Annonce();

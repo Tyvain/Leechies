@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class Annonce implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -42,7 +44,8 @@ public class Annonce implements Serializable {
 		ret += "\nisCommerciale : "+ isCommerciale;
 		ret += "\nuploadedTime : "+ uploadedTime;
 		ret += "\nuhasError : "+ hasError;
-		ret += "\nerror : "+ error;
+		String wtf = StringUtils.isEmpty(error) ? "none":error;
+		ret += "\nerror : " + wtf;
 		ret += "\ndisplayImages () : "+ displayImages ();
 		return ret;
 	}

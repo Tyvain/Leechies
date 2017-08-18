@@ -30,8 +30,8 @@ public class App {
     static int statNbAnnoncesAlreadyInDB = 0;
     static int statNbNotAlreadyInDB = 0;
 
-	public static String ALL_SOURCES[] =  { "sources-immonc.yml", "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml" };
-	//public static String ALL_SOURCES[] =  { "sources-immonc.yml" };
+	//public static String ALL_SOURCES[] =  { "sources-immonc.yml", "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml" };
+	public static String ALL_SOURCES[] =  { "sources-vehicules.yml" };
 	public static String SOURCES[] = ALL_SOURCES;
 
 	// # !!!
@@ -47,25 +47,6 @@ public class App {
 	    int diff = totalUpAnnonces - MAX_UPLOAD_ADS;
 	    final Instant start = Instant.now();
 	    	    	    
-	    String initTrace = "\n### DEBUT ### " ;
-	    initTrace += "\nSOURCES: " + SOURCES.length;
-	    initTrace += "\nFORCE_REMOVE_UPLOAD_ADS: " + FORCE_REMOVE_UPLOAD_ADS;
-	    initTrace += "\nRESET_DB: " + RESET_DB;
-	    initTrace += "\nMAX_UPLOAD_ADS: " + MAX_UPLOAD_ADS;	    
-	    initTrace += "\n### INFOS ### " ;	    
-	    initTrace += "\n-- Total Ads online: " + totalUpAnnonces;	   	    
-	    initTrace += "\n-- LOCAL DB";
-        initTrace += "\n  - avec images: " + DBManager.getAnnoncesByCriteria(null, null, null, true).count();
-        initTrace += "\n  - sans images: " + DBManager.getAnnoncesByCriteria(null, null, null, false).count();
-        initTrace += "\n  - uploaded: " + DBManager.getAnnoncesByCriteria(null, true, null, null).count();
-        initTrace += "\n  - non uploaded: " + DBManager.getAnnoncesByCriteria(null, false, null, null).count();
-        initTrace += "\n  - commerciales: " + DBManager.getAnnoncesByCriteria(null, null, true, null).count();
-        initTrace += "\n  - non commerciales: " + DBManager.getAnnoncesByCriteria(null, null, false, null).count();
-        initTrace += "\n  - avec erreurs: " + DBManager.getAnnoncesByCriteria(true, null, null, null).count();
-        initTrace += "\n  - sans erreurs: " + DBManager.getAnnoncesByCriteria(false, null, null, null).count();    
-	    
-	    logger.info(initTrace);
-	    
 	    DBManager.archiveDB();
 	    
 		if (RESET_DB) {
@@ -82,11 +63,30 @@ public class App {
 		   UploadManager.removeLastAnnonces(FORCE_REMOVE_UPLOAD_ADS);
 	   }
 	   
+	   String initTrace = "\n### DEBUT ### " ;
+	    initTrace += "\nSOURCES: " + SOURCES.length;
+	    initTrace += "\nFORCE_REMOVE_UPLOAD_ADS: " + FORCE_REMOVE_UPLOAD_ADS;
+	    initTrace += "\nRESET_DB: " + RESET_DB;
+	    initTrace += "\nMAX_UPLOAD_ADS: " + MAX_UPLOAD_ADS;	    
+	    initTrace += "\n### INFOS ### " ;	    
+	    initTrace += "\n-- Total Ads online: " + totalUpAnnonces;	   	    
+	    initTrace += "\n-- LOCAL DB";
+       initTrace += "\n  - avec images: " + DBManager.getAnnoncesByCriteria(null, null, null, true).count();
+       initTrace += "\n  - sans images: " + DBManager.getAnnoncesByCriteria(null, null, null, false).count();
+       initTrace += "\n  - uploaded: " + DBManager.getAnnoncesByCriteria(null, true, null, null).count();
+       initTrace += "\n  - non uploaded: " + DBManager.getAnnoncesByCriteria(null, false, null, null).count();
+       initTrace += "\n  - commerciales: " + DBManager.getAnnoncesByCriteria(null, null, true, null).count();
+       initTrace += "\n  - non commerciales: " + DBManager.getAnnoncesByCriteria(null, null, false, null).count();
+       initTrace += "\n  - avec erreurs: " + DBManager.getAnnoncesByCriteria(true, null, null, null).count();
+       initTrace += "\n  - sans erreurs: " + DBManager.getAnnoncesByCriteria(false, null, null, null).count();    
+	    
+	    logger.info(initTrace);
+	   
 	   goLeech();
 	   
 	   Duration duration = Duration.between(start, Instant.now());
 	   String endTrace = "\n### FIN ### ";
-	   endTrace += "\nTemps toal: " + duration.getSeconds() / 60 + " min";
+	   endTrace += "\nTemps total: " + duration.getSeconds() / 60 + " min";
 	   endTrace += "\nstatNbAnnoncesTraitees: " + statNbAnnoncesTraitees;
 	   endTrace += "\nstatNbAnnoncesUploadees: " + statNbAnnoncesUploadees;
 	   endTrace += "\nstatNbAnnoncesAlreadyInDB:" + statNbAnnoncesAlreadyInDB;
@@ -100,6 +100,16 @@ public class App {
             logger.info("... goUpload finished!");
    }*/
 
+	
+	/*
+	 * ### FIN ### 
+Temps toal: 352 min
+statNbAnnoncesTraitees: 615
+statNbAnnoncesUploadees: 613
+statNbAnnoncesAlreadyInDB:0
+statNbNotAlreadyInDB:97
+	 */
+	
     private static void goLeech() {
         final AtomicInteger count = new AtomicInteger();
         final AtomicLong avgTimeByAds = new AtomicLong();
@@ -127,9 +137,13 @@ public class App {
 		      		      
 		      // on trace toutes les x annonces
 		      if (count.get() % LOG_ADS_EVERY == 0) {
-		          String msg = "Nb annonces traitées: " + count.get() + "\nTemps moyen par annonce: " + avgTimeByAds + " sec";		          
+		          String msg = "Nb annonces traitées: " + count.get() + "\nTemps moyen par annonce: " + avgTimeByAds + " sec";	
+		          	msg += "\nTemps total: " + duration.getSeconds() / 60 + " min";
+		          	msg += "\nstatNbAnnoncesTraitees: " + statNbAnnoncesTraitees;
+		          	msg += "\nstatNbAnnoncesUploadees: " + statNbAnnoncesUploadees;
+		          	msg += "\nstatNbAnnoncesAlreadyInDB:" + statNbAnnoncesAlreadyInDB;
+		          	msg += "\nstatNbNotAlreadyInDB:" + statNbNotAlreadyInDB;
 		          logger.info(msg);
-		          System.out.println(msg);
 		      }
 		    });
 		logger.info("... goLeech finished!");
@@ -137,22 +151,15 @@ public class App {
 
 	private static Stream<Annonce> getAnnonceFromSource(Source source) {
 		return source.rubriques.stream()
-				.flatMap(r -> r.subUrls.stream().flatMap(u -> App.getAnnonce(source, u, r.category.libelle).get()));
+				.flatMap(r -> r.subUrls.stream().flatMap(u -> App.getAnnonce(source, u, r.category.libelle)));
 	}
 
-	private static Optional<Stream<Annonce>> getAnnonce(Source source, String url, String rub) {
+	private static Stream<Annonce> getAnnonce(Source source, String url, String rub) {
 		Class<?> clazz;
 		try {
-
-			// on eleve les urls qui existent deja
-			if (DBManager.annonceExists(url)) {
-				statNbAnnoncesAlreadyInDB++;
-				return Optional.empty();
-			}
-			statNbNotAlreadyInDB++;
 			clazz = Class.forName(source.className);
 			AbstractSite site = (AbstractSite) clazz.newInstance();
-			return Optional.of(site.getAnnonces(source.rootUrl, url, rub));
+			return site.getAnnonces(source.rootUrl, url, rub);
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			logger.error("App.getAnnonce - " + e);
 		}
