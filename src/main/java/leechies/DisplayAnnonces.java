@@ -1,9 +1,6 @@
 package leechies;
 
 import java.io.IOException;
-import java.util.Optional;
-
-import leechies.model.Annonce;
 
 import org.json.JSONException;
 import org.slf4j.Logger;
@@ -27,14 +24,6 @@ public class DisplayAnnonces {
         System.out.println("     - (à uploaded) non commerciales avec images non uploaded sans erreur: "
                            + DBManager.getAnnoncesByCriteria(false, false, false, true).count());
 
-        System.out.println("-- FINVALAB");
-        // System.out.println("Nb annonces : " + UploadManager.countAnnonces());   
-        Optional<Annonce> annonce = DBManager.getAnnoncesByUrl("https://automobiles.nc/a_an.php?g=detail_annonce&id=2429339");
-        String rep =  "Annonce non trouvée";
-        if (annonce.isPresent()) {
-            rep = ""+annonce.get();
-        }
-        System.out.println("-- Detail annonce : " + rep);
-        // DBManager.getAnnoncesByCriteria(null, true, null, null).forEach(item -> System.out.println(""+item));
+        System.out.println("-- FINVALAB");  
     }
 }

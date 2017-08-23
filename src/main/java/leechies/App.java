@@ -2,8 +2,6 @@ package leechies;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -34,7 +32,7 @@ public class App {
     public static Instant start = Instant.now();
     public static Duration duration;
 
-	public static String ALL_SOURCES[] =  { "sources-immonc.yml", "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml" };
+	public static String ALL_SOURCES[] =  { "sources-nautisme.yml" };
 	//public static String ALL_SOURCES[] =  { "sources-vehicules.yml" };
 	public static String SOURCES[] = ALL_SOURCES;
 
@@ -47,7 +45,8 @@ public class App {
 	private static int LOG_ADS_EVERY  = 10; // log every x ads
 
 	public static void main(String[] args) {
-		 try {
+		
+	 try {
 	    int totalUpAnnonces = UploadManager.countAnnonces();
 	    int diff = totalUpAnnonces - MAX_UPLOAD_ADS;
 	   
@@ -68,13 +67,13 @@ public class App {
 	   }
 	   
 	   String initTrace = "\n### DEBUT ### " ;
-	    initTrace += "\nSOURCES: " + SOURCES.length;
-	    initTrace += "\nFORCE_REMOVE_UPLOAD_ADS: " + FORCE_REMOVE_UPLOAD_ADS;
-	    initTrace += "\nRESET_DB: " + RESET_DB;
-	    initTrace += "\nMAX_UPLOAD_ADS: " + MAX_UPLOAD_ADS;	    
-	    initTrace += "\n### INFOS ### " ;	    
-	    initTrace += "\n-- Total Ads online: " + totalUpAnnonces;	   	    
-	    initTrace += "\n-- LOCAL DB";
+	   initTrace += "\nSOURCES: " + SOURCES.length;
+	   initTrace += "\nFORCE_REMOVE_UPLOAD_ADS: " + FORCE_REMOVE_UPLOAD_ADS;
+	   initTrace += "\nRESET_DB: " + RESET_DB;
+	   initTrace += "\nMAX_UPLOAD_ADS: " + MAX_UPLOAD_ADS;	    
+	   initTrace += "\n### INFOS ### " ;	    
+	   initTrace += "\n-- Total Ads online: " + totalUpAnnonces;	   	    
+	   initTrace += "\n-- LOCAL DB";
        initTrace += "\n  - avec images: " + DBManager.getAnnoncesByCriteria(null, null, null, true).count();
        initTrace += "\n  - sans images: " + DBManager.getAnnoncesByCriteria(null, null, null, false).count();
        initTrace += "\n  - uploaded: " + DBManager.getAnnoncesByCriteria(null, true, null, null).count();
@@ -102,37 +101,35 @@ public class App {
 
 	
 	
-    private static void goLeech() {
-        
+	private static void goLeech() {
+
 		logger.info("Starting goLeech...");
-		App.getSourceStream()
-		.flatMap(s -> {
+		App.getSourceStream().flatMap(s -> {
 			return getAnnonceFromSource(s);
-		})
-		.forEach(a -> {
-		      DBManager.saveAnnonce(a);
-		      if (a.hasError == false && a.isCommerciale == false && (a.imgs != null && a.imgs.length > 0)) {
-						if (a.uploadedTime != null) {
-							System.out.println("uploading ad: " + a);
-							boolean isUploadSuccess = UploadManager.uploadAnnonceWithImage(a);
-							if (isUploadSuccess) {
-								statNbAnnoncesUploadees++;
-							}
-						} else {
-							statNbAnnoncesAlreadyUploaded++;
-						}
-						statNbAnnoncesTraitees++;
-					}		      
-		      		      		      
-		      // on trace toutes les x annonces
-		      duration = Duration.between(start, Instant.now());
-			  avgTimeByAds.set(duration.getSeconds() / countAnnoncesTraitees.incrementAndGet());
-		      if (countAnnoncesTraitees.get() % LOG_ADS_EVERY == 0) {
-		    	  logStats("");
-		      }
-		    });
+		}).forEach(a -> {
+			DBManager.saveAnnonce(a);
+			if (a.hasError == false && a.isCommerciale == false && (a.imgs != null && a.imgs.length > 0)) {
+				if (a.uploadedTime == null) {
+					System.out.println("uploading ad: " + a);
+					boolean isUploadSuccess = UploadManager.uploadAnnonceWithImage(a);
+					if (isUploadSuccess) {
+						statNbAnnoncesUploadees++;
+					}
+				} else {
+					statNbAnnoncesAlreadyUploaded++;
+				}
+				statNbAnnoncesTraitees++;
+			}
+
+			// on trace toutes les x annonces
+			duration = Duration.between(start, Instant.now());
+			avgTimeByAds.set(duration.getSeconds() / countAnnoncesTraitees.incrementAndGet());
+			if (countAnnoncesTraitees.get() % LOG_ADS_EVERY == 0) {
+				logStats("");
+			}
+		});
 		logger.info("... goLeech finished!");
-        }
+	}
 
     public static void logStats(String m) {
 		

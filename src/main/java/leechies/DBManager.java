@@ -9,21 +9,22 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
-
-import leechies.model.Annonce;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import leechies.model.Annonce;
 
 @SuppressWarnings("unchecked")
 public class DBManager {
     final static Logger logger = LoggerFactory.getLogger("DBManager");
     
+    //private static String DB_URL = "D:\\AllAdsDB";
     private static String DB_URL = "/projects/db/AllAdsDB";
 	private static File fileDB = new File(DB_URL);
 	private static FileInputStream fis;
@@ -33,13 +34,19 @@ public class DBManager {
 	private static Map<String, Annonce> allAds;
 
 	public static void archiveDB() throws IOException {
-		String fileName = DB_URL+"_BACKUP_"+new Date();
-		fileName  = fileName.replaceAll("\\s+","");
-		Files.copy(fileDB.toPath(), Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
+		File f = new File(DB_URL);
+		if(f.exists() && !f.isDirectory()) { 
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+			String textDate = LocalDate.now().format(formatter);
+			String fileName = DB_URL+"_BACKUP_"+ textDate;
+			fileName  = fileName.replaceAll("\\s+","");
+			Files.copy(fileDB.toPath(), Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
+		} else {
+			resetDB ();
+		}		
 	}
 	
     public static void resetDB () throws IOException {
-    		archiveDB();
 		try {
 			fos = new FileOutputStream(fileDB);
 			oos = new ObjectOutputStream(fos);
@@ -91,9 +98,9 @@ public class DBManager {
 			return getAllAnnoncesMap().values().stream();		
 	}
 
-    public static Optional<Annonce> getAnnoncesByUrl(String url) {
-        return getAllAnnonces()
-        .filter(f -> url.equalsIgnoreCase(f.url)).findFirst();
+    public static Annonce getAnnoncesByUrl(String url) {
+       // return getAllAnnonces().filter(f -> url.equalsIgnoreCase(f.url)).findFirst();
+    	return getAllAnnoncesMap().get(url);
     }
 	
     public static Stream<Annonce> getAnnoncesByCriteria(Boolean hasError, Boolean isUploaded, Boolean isCommerciale, Boolean hasImages) {

@@ -1,12 +1,7 @@
 package leechies.sites;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.stream.Stream;
-
-import leechies.App;
-import leechies.DBManager;
-import leechies.model.Annonce;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -14,6 +9,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import leechies.App;
+import leechies.DBManager;
+import leechies.model.Annonce;
 
 public abstract class AbstractSite {
     final static Logger logger = LoggerFactory.getLogger("AbstractSite");
@@ -31,17 +30,6 @@ public abstract class AbstractSite {
 	protected String getVille(Document doc) {
 	    return null;
 	 }
-	
-	/* TODO
-	 * 			// on eleve les urls qui existent deja
-			if (DBManager.annonceExists(url)) {
-				logger.info(url + "->exists in db!");
-				statNbAnnoncesAlreadyInDB++;
-				return Optional.empty();
-			}
-			logger.info(url + "->NOT exists in db!");
-			statNbNotAlreadyInDB++;
-	 */
 
 	public Stream<Annonce> getAnnonces(String rootUrl, String rubUrl, String rub) {
 		// liste des docs (cas des pages contenant les liens)  
@@ -66,20 +54,27 @@ public abstract class AbstractSite {
 	}
 
 	protected Annonce getAnnonceFromUrl(String url, String rootUrl, String rub) {
+		String log = "getAnnonceFromUrl: ";		
 		
-		if (DBManager.annonceExists(url)) {
+		boolean annonceExistsInDb = DBManager.annonceExists(url);
+		log += " annonceExistsInDb -> " + annonceExistsInDb;
+		if (annonceExistsInDb) {
 			App.statNbAnnoncesAlreadyInDB++;
-			return DBManager.getAnnoncesByUrl(url).get();
+			return DBManager.getAnnoncesByUrl(url);
 		}
+		
 		Document doc = getDocumentFromUrl(url);
+		log += " doc == null -> " + doc == null;
 		if (doc == null) {
 			Annonce ret = new Annonce();
 			ret.url = url;
 			ret.isCommerciale = true;
 			ret.hasError = true;
+			ret.error = "Impossible de récupérer l'annonce à l'url spécifiée";
 			return ret;
 		}
 		App.statNbNotAlreadyInDB++;
+		//logger.info(log);
 		return getAnnonce(doc, url, rootUrl, rub);
 	}
 
