@@ -7,31 +7,35 @@ import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
-
-import leechies.model.Annonce;
-import leechies.model.Source;
-import leechies.sites.AbstractSite;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.esotericsoftware.yamlbeans.YamlReader;
 
+import leechies.model.Annonce;
+import leechies.model.Source;
+import leechies.sites.AbstractSite;
+
 
 public class App {
     final static Logger logger = LoggerFactory.getLogger("App");
     
-    static int statNbAnnoncesTraitees = 0;
-    static int statNbAnnoncesUploadees = 0;    
-    static int statNbAnnoncesAlreadyInDB = 0;
-    static int statNbNotAlreadyInDB = 0;
+    public static int statNbAnnoncesTraitees = 0;
+    public static int statNbAnnoncesUploadees = 0;    
+    public static int statNbAnnoncesAlreadyInDB = 0;
+    public static int statNbAnnoncesAlreadyUploaded = 0;
+    public static int statNbNotAlreadyInDB = 0;
+    public static AtomicInteger countAnnoncesTraitees = new AtomicInteger();
+    public static AtomicLong avgTimeByAds = new AtomicLong();
+    public static Instant start = Instant.now();
+    public static Duration duration;
 
-	//public static String ALL_SOURCES[] =  { "sources-immonc.yml", "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml" };
-	public static String ALL_SOURCES[] =  { "sources-vehicules.yml" };
+	public static String ALL_SOURCES[] =  { "sources-immonc.yml", "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml" };
+	//public static String ALL_SOURCES[] =  { "sources-vehicules.yml" };
 	public static String SOURCES[] = ALL_SOURCES;
 
 	// # !!!
@@ -42,12 +46,12 @@ public class App {
 	private static int MAX_UPLOAD_ADS = 4000; // max ads on website	
 	private static int LOG_ADS_EVERY  = 10; // log every x ads
 
-	public static void main(String[] args) throws IOException, URISyntaxException {   
+	public static void main(String[] args) {
+		 try {
 	    int totalUpAnnonces = UploadManager.countAnnonces();
 	    int diff = totalUpAnnonces - MAX_UPLOAD_ADS;
-	    final Instant start = Instant.now();
-	    	    	    
-	    DBManager.archiveDB();
+	   
+		DBManager.archiveDB();
 	    
 		if (RESET_DB) {
 			logger.warn("Reseting DB...");
@@ -83,15 +87,11 @@ public class App {
 	    logger.info(initTrace);
 	   
 	   goLeech();
-	   
-	   Duration duration = Duration.between(start, Instant.now());
-	   String endTrace = "\n### FIN ### ";
-	   endTrace += "\nTemps total: " + duration.getSeconds() / 60 + " min";
-	   endTrace += "\nstatNbAnnoncesTraitees: " + statNbAnnoncesTraitees;
-	   endTrace += "\nstatNbAnnoncesUploadees: " + statNbAnnoncesUploadees;
-	   endTrace += "\nstatNbAnnoncesAlreadyInDB:" + statNbAnnoncesAlreadyInDB;
-	   endTrace += "\nstatNbNotAlreadyInDB:" + statNbNotAlreadyInDB;
-	   logger.info(endTrace);
+
+	   logStats("\n### FIN ###");
+		 } catch (Exception e) {
+			 logger.error("\n### MAIN ERROR ### ", e);
+		}
 	}
 
 /*    private static void goUpload () {
@@ -101,19 +101,8 @@ public class App {
    }*/
 
 	
-	/*
-	 * ### FIN ### 
-Temps toal: 352 min
-statNbAnnoncesTraitees: 615
-statNbAnnoncesUploadees: 613
-statNbAnnoncesAlreadyInDB:0
-statNbNotAlreadyInDB:97
-	 */
 	
     private static void goLeech() {
-        final AtomicInteger count = new AtomicInteger();
-        final AtomicLong avgTimeByAds = new AtomicLong();
-        final Instant start = Instant.now();
         
 		logger.info("Starting goLeech...");
 		App.getSourceStream()
@@ -121,33 +110,41 @@ statNbNotAlreadyInDB:97
 			return getAnnonceFromSource(s);
 		})
 		.forEach(a -> {
-		      DBManager.saveAnnonce(a);		      
-		      
+		      DBManager.saveAnnonce(a);
 		      if (a.hasError == false && a.isCommerciale == false && (a.imgs != null && a.imgs.length > 0)) {
-		          System.out.println("uploading ad: " + a);
-		          boolean isUploadSuccess = UploadManager.uploadAnnonceWithImage(a);
-		          statNbAnnoncesTraitees++;
-		          if (isUploadSuccess) {
-		        	  statNbAnnoncesUploadees++;
-		          }
-		      }
-		      
-		      Duration duration = Duration.between(start, Instant.now());
-		      avgTimeByAds.set(duration.getSeconds() / count.incrementAndGet());
-		      		      
+						if (a.uploadedTime != null) {
+							System.out.println("uploading ad: " + a);
+							boolean isUploadSuccess = UploadManager.uploadAnnonceWithImage(a);
+							if (isUploadSuccess) {
+								statNbAnnoncesUploadees++;
+							}
+						} else {
+							statNbAnnoncesAlreadyUploaded++;
+						}
+						statNbAnnoncesTraitees++;
+					}		      
+		      		      		      
 		      // on trace toutes les x annonces
-		      if (count.get() % LOG_ADS_EVERY == 0) {
-		          String msg = "Nb annonces traitées: " + count.get() + "\nTemps moyen par annonce: " + avgTimeByAds + " sec";	
-		          	msg += "\nTemps total: " + duration.getSeconds() / 60 + " min";
-		          	msg += "\nstatNbAnnoncesTraitees: " + statNbAnnoncesTraitees;
-		          	msg += "\nstatNbAnnoncesUploadees: " + statNbAnnoncesUploadees;
-		          	msg += "\nstatNbAnnoncesAlreadyInDB:" + statNbAnnoncesAlreadyInDB;
-		          	msg += "\nstatNbNotAlreadyInDB:" + statNbNotAlreadyInDB;
-		          logger.info(msg);
+		      duration = Duration.between(start, Instant.now());
+			  avgTimeByAds.set(duration.getSeconds() / countAnnoncesTraitees.incrementAndGet());
+		      if (countAnnoncesTraitees.get() % LOG_ADS_EVERY == 0) {
+		    	  logStats("");
 		      }
 		    });
 		logger.info("... goLeech finished!");
         }
+
+    public static void logStats(String m) {
+		
+		  String msg = m + "\nNb annonces traitées: " + countAnnoncesTraitees.get() + "\nTemps moyen par annonce: " + avgTimeByAds + " sec";	
+		  	msg += "\nTemps total: " + duration.getSeconds() / 60 + " min";
+		  	msg += "\nstatNbAnnoncesTraitees: " + statNbAnnoncesTraitees;
+		  	msg += "\nstatNbAnnoncesUploadees: " + statNbAnnoncesUploadees;
+		  	msg += "\nstatNbAnnoncesAlreadyUploaded: " + statNbAnnoncesAlreadyUploaded;
+		  	msg += "\nstatNbAnnoncesAlreadyInDB:" + statNbAnnoncesAlreadyInDB;
+		  	msg += "\nstatNbNotAlreadyInDB:" + statNbNotAlreadyInDB;
+		  	 logger.info(msg);
+    }
 
 	private static Stream<Annonce> getAnnonceFromSource(Source source) {
 		return source.rubriques.stream()

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import leechies.App;
 import leechies.DBManager;
 import leechies.model.Annonce;
 
@@ -67,6 +68,7 @@ public abstract class AbstractSite {
 	protected Annonce getAnnonceFromUrl(String url, String rootUrl, String rub) {
 		
 		if (DBManager.annonceExists(url)) {
+			App.statNbAnnoncesAlreadyInDB++;
 			return DBManager.getAnnoncesByUrl(url).get();
 		}
 		Document doc = getDocumentFromUrl(url);
@@ -77,6 +79,7 @@ public abstract class AbstractSite {
 			ret.hasError = true;
 			return ret;
 		}
+		App.statNbNotAlreadyInDB++;
 		return getAnnonce(doc, url, rootUrl, rub);
 	}
 
