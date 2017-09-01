@@ -27,18 +27,18 @@ public class App {
     public static int statNbAnnoncesAlreadyInDB = 0;
     public static int statNbAnnoncesAlreadyUploaded = 0;
     public static int statNbNotAlreadyInDB = 0;
+    public static Duration statTotalUploadAdTime = Duration.ZERO;
     public static AtomicInteger countAnnoncesTraitees = new AtomicInteger();
     public static AtomicLong avgTimeByAds = new AtomicLong();
     public static Instant start = Instant.now();
     public static Duration duration;
 
-	public static String ALL_SOURCES[] =  { "sources-nautisme.yml" };
+	public static String ALL_SOURCES[] =  { "sources-immonc.yml", "sources-annonces.yml", "sources-nautisme.yml", "sources-mode.yml", "sources-vehicules.yml" };
 	//public static String ALL_SOURCES[] =  { "sources-vehicules.yml" };
 	public static String SOURCES[] = ALL_SOURCES;
 
 	// # !!!
 	private static int FORCE_REMOVE_UPLOAD_ADS= 0; // remove the last x ads from website
-	private static boolean RESET_DB = false; // reset local DB (backup old one)
 	// # !!!
 	
 	private static int MAX_UPLOAD_ADS = 4000; // max ads on website	
@@ -49,14 +49,6 @@ public class App {
 	 try {
 	    int totalUpAnnonces = UploadManager.countAnnonces();
 	    int diff = totalUpAnnonces - MAX_UPLOAD_ADS;
-	   
-		DBManager.archiveDB();
-	    
-		if (RESET_DB) {
-			logger.warn("Reseting DB...");
-			DBManager.resetDB();
-		}
-
 	   
 	   if (diff > 0) {	       
 	       UploadManager.removeLastAnnonces(diff);
@@ -69,7 +61,6 @@ public class App {
 	   String initTrace = "\n### DEBUT ### " ;
 	   initTrace += "\nSOURCES: " + SOURCES.length;
 	   initTrace += "\nFORCE_REMOVE_UPLOAD_ADS: " + FORCE_REMOVE_UPLOAD_ADS;
-	   initTrace += "\nRESET_DB: " + RESET_DB;
 	   initTrace += "\nMAX_UPLOAD_ADS: " + MAX_UPLOAD_ADS;	    
 	   initTrace += "\n### INFOS ### " ;	    
 	   initTrace += "\n-- Total Ads online: " + totalUpAnnonces;	   	    
@@ -93,13 +84,6 @@ public class App {
 		}
 	}
 
-/*    private static void goUpload () {
-            logger.info("Starting goUpload...");
-            DBManager.getAnnoncesByCriteria(false, false, false, true).forEach(a -> UploadManager.uploadAnnonceWithImage(a));
-            logger.info("... goUpload finished!");
-   }*/
-
-	
 	
 	private static void goLeech() {
 
@@ -110,8 +94,9 @@ public class App {
 			DBManager.saveAnnonce(a);
 			if (a.hasError == false && a.isCommerciale == false && (a.imgs != null && a.imgs.length > 0)) {
 				if (a.uploadedTime == null) {
-					System.out.println("uploading ad: " + a);
+					Instant startChrono = Instant.now();
 					boolean isUploadSuccess = UploadManager.uploadAnnonceWithImage(a);
+					statTotalUploadAdTime = statTotalUploadAdTime.plus(Duration.between(Instant.now(), startChrono));
 					if (isUploadSuccess) {
 						statNbAnnoncesUploadees++;
 					}
@@ -131,8 +116,7 @@ public class App {
 		logger.info("... goLeech finished!");
 	}
 
-    public static void logStats(String m) {
-		
+    public static void logStats(String m) {		
 		  String msg = m + "\nNb annonces traitées: " + countAnnoncesTraitees.get() + "\nTemps moyen par annonce: " + avgTimeByAds + " sec";	
 		  	msg += "\nTemps total: " + duration.getSeconds() / 60 + " min";
 		  	msg += "\nstatNbAnnoncesTraitees: " + statNbAnnoncesTraitees;
@@ -140,6 +124,8 @@ public class App {
 		  	msg += "\nstatNbAnnoncesAlreadyUploaded: " + statNbAnnoncesAlreadyUploaded;
 		  	msg += "\nstatNbAnnoncesAlreadyInDB:" + statNbAnnoncesAlreadyInDB;
 		  	msg += "\nstatNbNotAlreadyInDB:" + statNbNotAlreadyInDB;
+		  	msg += "\nstatTotalUploadAdTime:" + statTotalUploadAdTime;
+		  	msg += "\navg time upload 1 ad:" + statTotalUploadAdTime.dividedBy(statNbAnnoncesUploadees);
 		  	 logger.info(msg);
     }
 

@@ -1,5 +1,6 @@
 package leechies.sites;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -42,16 +43,15 @@ public class ImmobilierNcWamSite extends AbstractSite {
 	}
 
 	@Override
-    protected String[] getImagesFromDoc(Document doc, String rootUrl) {
+    protected List<String> getImagesFromDoc(Document doc, String rootUrl) {
         Elements els = doc.select(getImageSelector());
         Stream<String> imgz = els.stream().map(e -> {            
             String href = e.attr("href");            
             String img = StringUtils.substringBetween(href, "big&src=", "&title");
             //System.out.println("img: " + rootUrl+img);
             return img!=null?rootUrl+img:"";
-            });        
-        String[] stringArray = imgz.toArray(size -> new String[size]);
-        return stringArray;
+            });  
+        return imgz.collect(Collectors.toList());
 }
 	
 }

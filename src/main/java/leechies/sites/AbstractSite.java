@@ -1,6 +1,7 @@
 package leechies.sites;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -123,14 +124,13 @@ public abstract class AbstractSite {
 		return null;
 	}
 
-	protected String[] getImagesFromDoc(Document doc, String rootUrl) {
+	protected List<String> getImagesFromDoc(Document doc, String rootUrl) {
 		Elements els = doc.select(getImageSelector());
 		Stream<String> imgz = els.stream().map(e -> {
 			String href = e.attr("href");
 			String img = StringUtils.substringBetween(href, "big&src=", "&title");
 			return img != null ? img : "";
 		});
-		String[] stringArray = imgz.toArray(size -> new String[size]);
-		return stringArray;
+		return imgz.collect(Collectors.toList());
 	}
 }
